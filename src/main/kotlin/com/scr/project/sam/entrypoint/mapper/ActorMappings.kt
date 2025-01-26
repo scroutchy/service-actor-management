@@ -18,4 +18,5 @@ fun Actor.toApiDto() = ActorApiDto(
     deathDate?.let { true } ?: false,
     birthDate,
     deathDate,
+    id,
 )
