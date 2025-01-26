@@ -22,12 +22,6 @@ variables:
   DOCKER_DRIVER: overlay2
   DOCKER_HOST: tcp://docker:2375/
 
-verify_docker:
-  stage: test
-  script:
-    - docker info
-    - docker run hello-world
-
 build:
   stage: build
   script: gradle --build-cache assemble
