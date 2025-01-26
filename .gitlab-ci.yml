@@ -18,6 +18,9 @@ before_script:
 services:
   - docker:dind
 
+variables:
+  DOCKER_DRIVER: overlay2
+
 build:
   stage: build
   script: gradle --build-cache assemble
