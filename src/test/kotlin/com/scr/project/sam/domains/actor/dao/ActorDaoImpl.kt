@@ -3,19 +3,26 @@ package com.scr.project.sam.domains.actor.dao
 import com.mongodb.client.MongoClients
 import com.mongodb.client.MongoCollection
 import com.scr.project.sam.domains.actor.model.entity.Actor
+import jakarta.annotation.PostConstruct
 import org.bson.Document
 import org.bson.types.ObjectId
+import org.springframework.beans.factory.annotation.Value
 import java.time.LocalDate
 import java.util.*
 
 
-class ActorDaoImpl: ActorDao {
+class ActorDaoImpl(@Value("\${spring.data.mongodb.uri}") private val mongoUri: String): ActorDao {
 
-    private val client = MongoClients.create("mongodb://localhost:27017")
-    private val database = client.getDatabase("test")
-    private val collection: MongoCollection<Document> = database.getCollection("actor")
+    private lateinit var collection: MongoCollection<Document>
 
-    override fun insertActor(actor: Actor) {
+    @PostConstruct
+    fun init() {
+        val client = MongoClients.create(mongoUri)
+        val database = client.getDatabase("test")
+        collection = database.getCollection("actor")
+    }
+
+    override fun insert(actor: Actor) {
         val document = Document("_id", actor.id)
             .append("surname", actor.surname)
             .append("name", actor.name)
@@ -25,7 +32,7 @@ class ActorDaoImpl: ActorDao {
         collection.insertOne(document)
     }
 
-    override fun getActorById(id: ObjectId): Actor? {
+    override fun findById(id: ObjectId): Actor? {
         val document = collection.find(Document("_id", id)).first() ?: return null
         return Actor(
             document.getString("surname"),
@@ -37,7 +44,11 @@ class ActorDaoImpl: ActorDao {
         )
     }
 
-    override fun countActors(): Long {
+    override fun count(): Long {
         return collection.countDocuments()
+    }
+
+    override fun deleteAll() {
+        collection.deleteMany(Document())
     }
 }
