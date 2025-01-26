@@ -1,10 +1,12 @@
 package com.scr.project.sam.domains.actor.component
 
+import com.scr.project.sam.domains.actor.dao.ActorDao
 import com.scr.project.sam.domains.actor.model.entity.Actor
 import com.scr.project.sam.domains.actor.repository.ActorRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -20,7 +22,10 @@ import java.util.*
 
 @SpringBootTest
 @Testcontainers
-internal class ActorRepositoryTest(@Autowired private val actorRepository: ActorRepository) {
+internal class ActorRepositoryTest(
+    @Autowired private val actorRepository: ActorRepository,
+    @Autowired private val actorDao: ActorDao,
+) {
 
     companion object {
 
@@ -46,6 +51,11 @@ internal class ActorRepositoryTest(@Autowired private val actorRepository: Actor
         }
     }
 
+    @BeforeEach
+    fun setUp() {
+        actorDao.deleteAll()
+    }
+
     @Test
     fun `insert should succeed`() {
         val actor = Actor("surname", "name", Locale("", "FR"), LocalDate.of(1980, 1, 1), LocalDate.of(1990, 1, 1))
@@ -59,6 +69,7 @@ internal class ActorRepositoryTest(@Autowired private val actorRepository: Actor
                 assertThat(it.nationality).isEqualTo(actor.nationality)
                 assertThat(it.birthDate).isEqualTo(actor.birthDate)
                 assertThat(it.deathDate).isEqualTo(actor.deathDate)
+                assertThat(actorDao.count()).isEqualTo(1)
             }
             .verifyComplete()
     }
