@@ -11,15 +11,20 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
 import org.testcontainers.containers.MongoDBContainer
+import org.testcontainers.junit.jupiter.Container
+import org.testcontainers.junit.jupiter.Testcontainers
 import reactor.kotlin.test.test
 import java.time.LocalDate
 import java.util.*
 
 
 @SpringBootTest
+@Testcontainers
 internal class ActorRepositoryTest(@Autowired private val actorRepository: ActorRepository) {
 
     companion object {
+
+        @Container
         val mongoDBContainer = MongoDBContainer("mongo:5.0.3")
 
         @JvmStatic
