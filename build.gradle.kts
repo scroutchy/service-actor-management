@@ -31,6 +31,7 @@ dependencies {
 	testImplementation("org.testcontainers:testcontainers")
 	testImplementation("org.testcontainers:junit-jupiter")
 	testImplementation("org.testcontainers:mongodb")
+	testImplementation("io.mockk:mockk:1.12.0")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
