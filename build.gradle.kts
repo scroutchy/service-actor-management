@@ -46,10 +46,9 @@ tasks.withType<Test> {
 	useJUnitPlatform()
 	finalizedBy("jacocoTestReport")
 }
-
-jacoco {
-    toolVersion = "0.8.12"
-}
+//jacoco {
+//    toolVersion = "0.8.12"
+//}
 
 tasks.jacocoTestReport {
 	dependsOn(tasks.test)
