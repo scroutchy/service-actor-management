@@ -42,20 +42,21 @@ kotlin {
 	}
 }
 
-tasks.withType<Test> {
-	useJUnitPlatform()
-	finalizedBy("jacocoTestReport")
-}
+
 
 tasks.jacocoTestReport {
-	dependsOn(tasks.test)
-	reports {
-		xml.required.set(true)
-		html.required.set(true)
+    dependsOn(tasks.test)
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
         csv.required.set(false)
-	}
+    }
+}
+
+tasks.register("printCoverage") {
+    dependsOn(tasks.jacocoTestReport)
     doLast {
-        val reportFile = layout.buildDirectory.file("/reports/jacoco/test/jacocoTestReport.xml").get().asFile
+        val reportFile = layout.buildDirectory.file("reports/jacoco/test/jacocoTestReport.xml").get().asFile
         if (reportFile.exists()) {
             val factory = javax.xml.parsers.DocumentBuilderFactory.newInstance()
             factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false)
@@ -75,4 +76,9 @@ tasks.jacocoTestReport {
             println("JaCoCo report file not found!")
         }
     }
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
+    finalizedBy("jacocoTestReport", tasks.named("printCoverage"))
 }
