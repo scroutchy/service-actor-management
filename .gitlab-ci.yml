@@ -48,7 +48,7 @@ test:
         path: build/reports/jacoco/test/jacocoTestReport.xml
     paths:
       - build/reports/jacoco/test/jacocoTestReport.xml
-  coverage: '/Total.*?([0-9,]{1,5})%/'
+  coverage: '/Total.*?([0-9,.]{1,5})%/'
 
 deploy:
   stage: deploy

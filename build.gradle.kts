@@ -54,6 +54,8 @@ tasks.jacocoTestReport {
 }
 
 tasks.register("printCoverage") {
+    group = "verification"
+    description = "Prints the code coverage of the project"
     dependsOn(tasks.jacocoTestReport)
     doLast {
         val reportFile = layout.buildDirectory.file("reports/jacoco/test/jacocoTestReport.xml").get().asFile
