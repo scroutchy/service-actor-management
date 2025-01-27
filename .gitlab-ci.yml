@@ -41,6 +41,14 @@ test:
     paths:
       - build
       - .gradle
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: build/reports/jacoco/test/jacocoTestReport.xml
+    paths:
+      - build/reports/jacoco/test/jacocoTestReport.xml
+  coverage: '/Total.*?([0-9]{1,3})%/'
 
 deploy:
   stage: deploy
