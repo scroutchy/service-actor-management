@@ -41,6 +41,11 @@ test:
     paths:
       - build
       - .gradle
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: jacoco
+        path: 'build/reports/jacoco/test/jacocoTestReport.xml'
 
 deploy:
   stage: deploy
