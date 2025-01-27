@@ -48,7 +48,7 @@ tasks.withType<Test> {
 }
 
 jacoco {
-	toolVersion = "0.8.7"
+    toolVersion = "0.8.12"
 }
 
 tasks.jacocoTestReport {
@@ -56,6 +56,6 @@ tasks.jacocoTestReport {
 	reports {
 		xml.required.set(true)
 		html.required.set(true)
-		csv.required.set(true)
+        csv.required.set(false)
 	}
 }
