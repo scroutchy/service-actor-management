@@ -1,55 +1,25 @@
 package com.scr.project.sam.domains.actor.component
 
+import com.scr.project.sam.AbstractIntegrationTest
 import com.scr.project.sam.domains.actor.dao.ActorDao
 import com.scr.project.sam.domains.actor.model.entity.Actor
 import com.scr.project.sam.domains.actor.repository.ActorRepository
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.DynamicPropertyRegistry
-import org.springframework.test.context.DynamicPropertySource
-import org.testcontainers.containers.MongoDBContainer
-import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 import reactor.kotlin.test.test
 import java.time.LocalDate
-import java.util.*
-
+import java.util.Locale
 
 @SpringBootTest
 @Testcontainers
 internal class ActorRepositoryTest(
     @Autowired private val actorRepository: ActorRepository,
     @Autowired private val actorDao: ActorDao,
-) {
-
-    companion object {
-
-        @Container
-        val mongoDBContainer = MongoDBContainer("mongo:5.0.3")
-
-        @JvmStatic
-        @DynamicPropertySource
-        fun mongoProperties(registry: DynamicPropertyRegistry) {
-            registry.add("spring.data.mongodb.uri", mongoDBContainer::getReplicaSetUrl)
-        }
-
-        @JvmStatic
-        @BeforeAll
-        fun startContainer() {
-            mongoDBContainer.start()
-        }
-
-        @JvmStatic
-        @AfterAll
-        fun stopContainer() {
-            mongoDBContainer.stop()
-        }
-    }
+) : AbstractIntegrationTest() {
 
     @BeforeEach
     fun setUp() {
@@ -73,5 +43,4 @@ internal class ActorRepositoryTest(
             }
             .verifyComplete()
     }
-
 }

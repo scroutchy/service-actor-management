@@ -1,11 +1,10 @@
 package com.scr.project.sam.entrypoint.integration.resource
 
+import com.scr.project.sam.AbstractIntegrationTest
 import com.scr.project.sam.TestConfig
 import com.scr.project.sam.domains.actor.dao.ActorDao
 import com.scr.project.sam.entrypoint.model.api.ActorApiDto
 import com.scr.project.sam.entrypoint.resource.ActorResource.Companion.ACTOR_PATH
-import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient
@@ -13,11 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.context.annotation.Import
-import org.springframework.test.context.DynamicPropertyRegistry
-import org.springframework.test.context.DynamicPropertySource
 import org.springframework.test.web.reactive.server.WebTestClient
-import org.testcontainers.containers.MongoDBContainer
-import org.testcontainers.junit.jupiter.Container
 import java.time.LocalDate
 import java.util.Locale
 
@@ -27,31 +22,7 @@ import java.util.Locale
 internal class ActorResourceIntegrationTest(
     @Autowired private val webTestClient: WebTestClient,
     @Autowired private val actorDao: ActorDao,
-) {
-
-    companion object {
-
-        @Container
-        val mongoDBContainer = MongoDBContainer("mongo:5.0.3")
-
-        @JvmStatic
-        @DynamicPropertySource
-        fun mongoProperties(registry: DynamicPropertyRegistry) {
-            registry.add("spring.data.mongodb.uri", mongoDBContainer::getReplicaSetUrl)
-        }
-
-        @JvmStatic
-        @BeforeAll
-        fun startContainer() {
-            mongoDBContainer.start()
-        }
-
-        @JvmStatic
-        @AfterAll
-        fun stopContainer() {
-            mongoDBContainer.stop()
-        }
-    }
+) : AbstractIntegrationTest() {
 
     @LocalServerPort
     private var port: Int = 0
