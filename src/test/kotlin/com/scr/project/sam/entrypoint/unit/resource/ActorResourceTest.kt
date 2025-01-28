@@ -20,7 +20,14 @@ import java.util.Locale
 class ActorResourceTest {
 
     private val actorRequest =
-        ActorApiDto("surname", "name", Locale("", "FR"), false, LocalDate.of(1980, 1, 1), LocalDate.of(1990, 1, 1))
+        ActorApiDto(
+            "surname",
+            "name",
+            Locale("", "FR"),
+            false,
+            LocalDate.of(1980, 1, 1),
+            LocalDate.of(1990, 1, 1),
+        )
     private val actorService = mockk<ActorService>()
     private val actorResource = ActorResource(actorService)
 

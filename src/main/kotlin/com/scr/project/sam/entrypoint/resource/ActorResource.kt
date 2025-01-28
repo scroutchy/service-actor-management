@@ -8,6 +8,7 @@ import com.scr.project.sam.entrypoint.resource.ActorResource.Companion.ACTOR_PAT
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Mono
@@ -23,7 +24,7 @@ class ActorResource(val actorService: ActorService) {
     private val logger: Logger = LoggerFactory.getLogger(ActorResource::class.java)
 
     @PostMapping
-    fun create(request: ActorApiDto): Mono<ActorApiDto> {
+    fun create(@RequestBody request: ActorApiDto): Mono<ActorApiDto> {
         return actorService.create(request.toEntity())
             .map { it.toApiDto() }
             .doOnSubscribe { logger.debug("Creation request received") }
