@@ -1,7 +1,6 @@
 package com.scr.project.sam.entrypoint.integration.resource
 
 import com.scr.project.sam.AbstractIntegrationTest
-import com.scr.project.sam.TestConfig
 import com.scr.project.sam.domains.actor.dao.ActorDao
 import com.scr.project.sam.entrypoint.model.api.ActorApiDto
 import com.scr.project.sam.entrypoint.resource.ActorResource.Companion.ACTOR_PATH
@@ -11,14 +10,12 @@ import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWeb
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
 import org.springframework.boot.test.web.server.LocalServerPort
-import org.springframework.context.annotation.Import
 import org.springframework.test.web.reactive.server.WebTestClient
 import java.time.LocalDate
 import java.util.Locale
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @AutoConfigureWebTestClient
-@Import(TestConfig::class)
 internal class ActorResourceIntegrationTest(
     @Autowired private val webTestClient: WebTestClient,
     @Autowired private val actorDao: ActorDao,
