@@ -4,6 +4,7 @@ import com.scr.project.sam.AbstractIntegrationTest
 import com.scr.project.sam.domains.actor.dao.ActorDao
 import com.scr.project.sam.entrypoint.model.api.ActorApiDto
 import com.scr.project.sam.entrypoint.resource.ActorResource.Companion.ACTOR_PATH
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient
@@ -33,6 +34,19 @@ internal class ActorResourceIntegrationTest(
             .bodyValue(actorRequest)
             .exchange()
             .expectStatus().isOk
-            .expectBody()
+            .expectBody(ActorApiDto::class.java)
+            .consumeWith {
+                val body = it.responseBody
+                assertThat(body).isNotNull
+                with(body!!) {
+                    assertThat(id).isNotNull
+                    assertThat(surname).isEqualTo(actorRequest.surname)
+                    assertThat(name).isEqualTo(actorRequest.name)
+                    assertThat(nationality).isEqualTo(actorRequest.nationality)
+                    assertThat(birthDate).isEqualTo(actorRequest.birthDate)
+                    assertThat(deathDate).isEqualTo(actorRequest.deathDate)
+                    assertThat(isAlive).isEqualTo(actorRequest.isAlive)
+                }
+            }
     }
 }
