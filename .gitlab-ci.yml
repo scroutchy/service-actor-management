@@ -15,6 +15,16 @@ before_script:
   - GRADLE_USER_HOME="$(pwd)/.gradle"
   - export GRADLE_USER_HOME
 
+variables:
+  SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  # Defines the location of the analysis task cache
+  GIT_DEPTH: "0"  # Tells git to fetch all the branches of the project, required by the analysis task
+
+stages:
+  - build
+  - test
+  - sonar
+  - deploy
+
 build:
   stage: build
   script: gradle --build-cache assemble
@@ -34,6 +44,15 @@ test:
     paths:
       - build
       - .gradle
+
+sonarcloud-check:
+  stage: sonar
+  cache:
+    key: "${CI_JOB_NAME}"
+    paths:
+      - .sonar/cache
+  script: gradle sonarqube
+  allow_failure: true
 
 deploy:
   stage: deploy
