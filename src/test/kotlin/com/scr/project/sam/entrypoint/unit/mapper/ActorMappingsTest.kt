@@ -32,7 +32,7 @@ class ActorMappingsTest {
     }
 
     @Test
-    fun `toApiDto should succeed`() {
+    fun `toApiDto should succeed when death date is filled`() {
         val actor = Actor(
             "surname",
             "name",
@@ -48,6 +48,28 @@ class ActorMappingsTest {
         assertThat(actorApiDto.nationality).isEqualTo(actor.nationality)
         assertThat(actorApiDto.birthDate).isEqualTo(actor.birthDate)
         assertThat(actorApiDto.deathDate).isEqualTo(actor.deathDate)
+        assertThat(actorApiDto.isAlive).isFalse()
+        assertThat(actorApiDto.id).isEqualTo(actor.id?.toHexString())
+    }
+
+    @Test
+    fun `toApiDto should succeed when death date is null`() {
+        val actor = Actor(
+            "surname",
+            "name",
+            Locale("", "FR"),
+            LocalDate.of(1980, 1, 1),
+            null,
+            ObjectId.get()
+        )
+        val actorApiDto = actor.toApiDto()
+        assertThat(actorApiDto).isNotNull
+        assertThat(actorApiDto.surname).isEqualTo(actor.surname)
+        assertThat(actorApiDto.name).isEqualTo(actor.name)
+        assertThat(actorApiDto.nationality).isEqualTo(actor.nationality)
+        assertThat(actorApiDto.birthDate).isEqualTo(actor.birthDate)
+        assertThat(actorApiDto.deathDate).isNull()
+        assertThat(actorApiDto.isAlive).isTrue()
         assertThat(actorApiDto.id).isEqualTo(actor.id?.toHexString())
     }
 }
