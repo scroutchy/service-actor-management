@@ -7,9 +7,8 @@ import jakarta.annotation.PostConstruct
 import org.bson.Document
 import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Value
-import java.time.LocalDate
-import java.util.*
-
+import java.time.ZoneId
+import java.util.Locale
 
 class ActorDaoImpl(@Value("\${spring.data.mongodb.uri}") private val mongoUri: String): ActorDao {
 
@@ -37,9 +36,9 @@ class ActorDaoImpl(@Value("\${spring.data.mongodb.uri}") private val mongoUri: S
         return Actor(
             document.getString("surname"),
             document.getString("name"),
-            Locale("", document.getString("nationality")),
-            LocalDate.parse(document.getString("birthDate")),
-            document.getString("deathDate")?.let { LocalDate.parse(it) },
+            stringToLocale(document.getString("nationality")),
+            document.getDate("birthDate").toInstant().atZone(ZoneId.systemDefault()).toLocalDate(),
+            document.getDate("deathDate")?.toInstant()?.atZone(ZoneId.systemDefault())?.toLocalDate(),
             document.getObjectId("_id")
         )
     }
@@ -50,5 +49,14 @@ class ActorDaoImpl(@Value("\${spring.data.mongodb.uri}") private val mongoUri: S
 
     override fun deleteAll() {
         collection.deleteMany(Document())
+    }
+
+    private fun stringToLocale(localeString: String): Locale {
+        val parts = localeString.split("_")
+        return when (parts.size) {
+            1 -> Locale(parts[0])
+            2 -> Locale(parts[0], parts[1])
+            else -> throw IllegalArgumentException("Invalid locale format")
+        }
     }
 }

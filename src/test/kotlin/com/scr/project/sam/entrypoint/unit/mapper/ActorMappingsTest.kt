@@ -48,6 +48,6 @@ class ActorMappingsTest {
         assertThat(actorApiDto.nationality).isEqualTo(actor.nationality)
         assertThat(actorApiDto.birthDate).isEqualTo(actor.birthDate)
         assertThat(actorApiDto.deathDate).isEqualTo(actor.deathDate)
-        assertThat(actorApiDto.id).isEqualTo(actor.id)
+        assertThat(actorApiDto.id).isEqualTo(actor.id?.toHexString())
     }
 }

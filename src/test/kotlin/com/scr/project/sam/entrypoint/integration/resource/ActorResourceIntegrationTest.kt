@@ -5,6 +5,8 @@ import com.scr.project.sam.domains.actor.dao.ActorDao
 import com.scr.project.sam.entrypoint.model.api.ActorApiDto
 import com.scr.project.sam.entrypoint.resource.ActorResource.Companion.ACTOR_PATH
 import org.assertj.core.api.Assertions.assertThat
+import org.bson.types.ObjectId
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient
@@ -25,9 +27,14 @@ internal class ActorResourceIntegrationTest(
     @LocalServerPort
     private var port: Int = 0
 
+    @BeforeEach
+    fun setUp() {
+        actorDao.deleteAll()
+    }
+
     @Test
     fun `create should succeed and create an actor`() {
-        val actorRequest = ActorApiDto("surname", "name", Locale("fr", "FR"), false, LocalDate.of(1980, 1, 1), LocalDate.of(1990, 1, 1))
+        val actorRequest = ActorApiDto("surname", "name", Locale("", "FR"), false, LocalDate.of(1980, 1, 1), LocalDate.of(1990, 1, 1))
         webTestClient.mutate().baseUrl("http://localhost:$port").build()
             .post()
             .uri(ACTOR_PATH)
@@ -46,6 +53,16 @@ internal class ActorResourceIntegrationTest(
                     assertThat(birthDate).isEqualTo(actorRequest.birthDate)
                     assertThat(deathDate).isEqualTo(actorRequest.deathDate)
                     assertThat(isAlive).isEqualTo(actorRequest.isAlive)
+                }
+                assertThat(actorDao.count()).isEqualTo(1)
+                val actor = actorDao.findById(ObjectId(body.id!!))
+                with(actor!!) {
+                    assertThat(id).isEqualTo(ObjectId(body.id))
+                    assertThat(surname).isEqualTo(body.surname)
+                    assertThat(name).isEqualTo(body.name)
+                    assertThat(nationality).isEqualTo(body.nationality)
+                    assertThat(birthDate).isEqualTo(body.birthDate)
+                    assertThat(deathDate).isEqualTo(body.deathDate)
                 }
             }
     }

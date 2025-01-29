@@ -1,6 +1,5 @@
 package com.scr.project.sam.entrypoint.model.api
 
-import org.bson.types.ObjectId
 import java.time.LocalDate
 import java.util.Locale
 
@@ -11,5 +10,5 @@ data class ActorApiDto(
     val isAlive: Boolean,
     val birthDate: LocalDate,
     val deathDate: LocalDate? = null,
-    var id: ObjectId? = null
+    var id: String? = null
 )
