@@ -9,11 +9,13 @@
 # https://gradle.org/
 # https://github.com/gradle/gradle
 
-image: gradle:jdk17-alpine
+image: docker:latest
 
 before_script:
   - GRADLE_USER_HOME="$(pwd)/.gradle"
   - export GRADLE_USER_HOME
+  - docker --version
+  - docker info
 
 services:
   - docker:dind
