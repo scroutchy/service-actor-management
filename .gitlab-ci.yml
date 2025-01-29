@@ -34,6 +34,7 @@ stages:
 build:
   stage: build
   script: gradle --build-cache assemble
+  when: manual
   cache:
     key: "$CI_COMMIT_REF_NAME"
     policy: push
@@ -44,6 +45,7 @@ build:
 test:
   stage: test
   script: gradle check
+  when: manual
   cache:
     key: "$CI_COMMIT_REF_NAME"
     policy: pull
@@ -61,6 +63,7 @@ test:
 
 sonarcloud-check:
   stage: sonar
+  when: manual
   cache:
     key: "${CI_JOB_NAME}"
     paths:
@@ -71,4 +74,5 @@ sonarcloud-check:
 deploy:
   stage: deploy
   script: echo "Define your deployment script!"
+  when: manual
   environment: production
