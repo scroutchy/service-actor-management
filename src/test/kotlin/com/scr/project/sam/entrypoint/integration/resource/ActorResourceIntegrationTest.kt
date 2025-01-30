@@ -3,7 +3,7 @@ package com.scr.project.sam.entrypoint.integration.resource
 import com.scr.project.sam.AbstractIntegrationTest
 import com.scr.project.sam.domains.actor.dao.ActorDao
 import com.scr.project.sam.entrypoint.model.api.ActorApiDto
-import com.scr.project.sam.entrypoint.resource.ActorResource.Companion.ACTOR_PATH
+import com.scr.project.sam.entrypoint.resource.ApiConstants.ACTOR_PATH
 import org.assertj.core.api.Assertions.assertThat
 import org.bson.types.ObjectId
 import org.junit.jupiter.api.BeforeEach
