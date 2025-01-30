@@ -14,8 +14,8 @@ image: gradle:jdk17-alpine
 before_script:
   - GRADLE_USER_HOME="$(pwd)/.gradle"
   - export GRADLE_USER_HOME
-  - apk add --no-cache docker-cli
-  - docker --version
+#  - apk add --no-cache docker-cli
+#  - docker --version
 
 services:
   - name: docker:dind
