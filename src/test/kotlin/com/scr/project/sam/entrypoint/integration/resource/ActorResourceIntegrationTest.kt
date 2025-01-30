@@ -7,6 +7,7 @@ import com.scr.project.sam.entrypoint.resource.ApiConstants.ACTOR_PATH
 import org.assertj.core.api.Assertions.assertThat
 import org.bson.types.ObjectId
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient
@@ -65,5 +66,19 @@ internal class ActorResourceIntegrationTest(
                     assertThat(deathDate).isEqualTo(body.deathDate)
                 }
             }
+    }
+
+    @Test
+    @Disabled("not finished")
+    fun `find should succeed and returns an actor response when id exists`() {
+        val actorResponse = ActorApiDto(
+            "surname",
+            "name",
+            Locale("", "FR"),
+            false,
+            LocalDate.of(1980, 1, 1),
+            LocalDate.of(1990, 1, 1),
+            ObjectId.get().toHexString()
+        )
     }
 }
