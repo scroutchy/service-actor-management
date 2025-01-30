@@ -6,8 +6,10 @@ import com.scr.project.sam.entrypoint.mapper.toEntity
 import com.scr.project.sam.entrypoint.model.api.ActorApiDto
 import com.scr.project.sam.entrypoint.resource.ActorResource
 import io.mockk.clearMocks
+import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import org.assertj.core.api.Assertions.assertThat
 import org.bson.types.ObjectId
 import org.junit.jupiter.api.BeforeEach
@@ -37,6 +39,9 @@ class ActorResourceTest {
         every { actorService.create(any<Actor>()) } answers {
             actorRequest.toEntity().copy(id = ObjectId.get()).toMono()
         }
+        every { actorService.findById(any<ObjectId>()) } answers {
+            actorRequest.toEntity().copy(id = firstArg()).toMono()
+        }
     }
 
     @Test
@@ -55,5 +60,28 @@ class ActorResourceTest {
                 assertThat(it.isAlive).isEqualTo(actorRequest.isAlive)
             }
             .verifyComplete()
+        verify(exactly = 1) { actorService.create(any<Actor>()) }
+        confirmVerified(actorService)
+    }
+
+    @Test
+    fun `find should succeed and return an actor response when id exits`() {
+        val id = ObjectId.get()
+        actorResource.find(id)
+            .test()
+            .expectSubscription()
+            .consumeNextWith {
+                assertThat(it).isNotNull()
+                assertThat(it.id).isEqualTo(id.toHexString())
+                assertThat(it.surname).isEqualTo(actorRequest.surname)
+                assertThat(it.name).isEqualTo(actorRequest.name)
+                assertThat(it.nationality).isEqualTo(actorRequest.nationality)
+                assertThat(it.birthDate).isEqualTo(actorRequest.birthDate)
+                assertThat(it.deathDate).isEqualTo(actorRequest.deathDate)
+                assertThat(it.isAlive).isEqualTo(actorRequest.isAlive)
+            }
+            .verifyComplete()
+        verify(exactly = 1) { actorService.findById(id) }
+        confirmVerified(actorService)
     }
 }

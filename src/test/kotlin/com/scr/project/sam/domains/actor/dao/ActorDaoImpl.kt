@@ -31,6 +31,10 @@ class ActorDaoImpl(@Value("\${spring.data.mongodb.uri}") private val mongoUri: S
         collection.insertOne(document)
     }
 
+    override fun insertAll(actors: List<Actor>) {
+        actors.forEach { insert(it) }
+    }
+
     override fun findById(id: ObjectId): Actor? {
         val document = collection.find(Document("_id", id)).first() ?: return null
         return Actor(
@@ -49,6 +53,11 @@ class ActorDaoImpl(@Value("\${spring.data.mongodb.uri}") private val mongoUri: S
 
     override fun deleteAll() {
         collection.deleteMany(Document())
+    }
+
+    override fun initTestData() {
+        deleteAll()
+        insertAll(listOf(bradPitt()))
     }
 
     private fun stringToLocale(localeString: String): Locale {
