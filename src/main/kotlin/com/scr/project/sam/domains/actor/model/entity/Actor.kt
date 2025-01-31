@@ -1,5 +1,6 @@
 package com.scr.project.sam.domains.actor.model.entity
 
+import org.bson.codecs.pojo.annotations.BsonId
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
@@ -13,5 +14,5 @@ data class Actor(
     val nationality: Locale,
     val birthDate: LocalDate,
     val deathDate: LocalDate? = null,
-    @field:Id var id: ObjectId? = null
+    @field:Id @BsonId var id: ObjectId? = null
 )
