@@ -33,6 +33,7 @@ dependencies {
 	testImplementation("io.projectreactor:reactor-test")
 	testImplementation("org.testcontainers:testcontainers")
 	testImplementation("org.testcontainers:junit-jupiter")
+    testImplementation("org.litote.kmongo:kmongo:4.10.0")
 	testImplementation("org.testcontainers:mongodb")
 	testImplementation("io.mockk:mockk:1.12.0")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
