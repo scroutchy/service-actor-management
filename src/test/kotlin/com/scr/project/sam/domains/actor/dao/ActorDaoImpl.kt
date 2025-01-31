@@ -1,34 +1,29 @@
 package com.scr.project.sam.domains.actor.dao
 
-import com.mongodb.client.MongoClients
 import com.mongodb.client.MongoCollection
 import com.scr.project.sam.domains.actor.model.entity.Actor
 import jakarta.annotation.PostConstruct
 import org.bson.Document
 import org.bson.types.ObjectId
+import org.litote.kmongo.KMongo
+import org.litote.kmongo.findOneById
 import org.springframework.beans.factory.annotation.Value
-import java.time.ZoneId
-import java.util.Locale
+import org.springframework.stereotype.Repository
 
+@Repository
 class ActorDaoImpl(@Value("\${spring.data.mongodb.uri}") private val mongoUri: String): ActorDao {
 
-    private lateinit var collection: MongoCollection<Document>
+    private lateinit var collection: MongoCollection<Actor>
 
     @PostConstruct
     fun init() {
-        val client = MongoClients.create(mongoUri)
+        val client = KMongo.createClient(mongoUri)
         val database = client.getDatabase("test")
-        collection = database.getCollection("actor")
+        collection = database.getCollection("actor", Actor::class.java)
     }
 
     override fun insert(actor: Actor) {
-        val document = Document("_id", actor.id)
-            .append("surname", actor.surname)
-            .append("name", actor.name)
-            .append("nationality", actor.nationality.toString())
-            .append("birthDate", actor.birthDate.toString())
-            .append("deathDate", actor.deathDate?.toString())
-        collection.insertOne(document)
+        collection.insertOne(actor)
     }
 
     override fun insertAll(actors: List<Actor>) {
@@ -36,15 +31,7 @@ class ActorDaoImpl(@Value("\${spring.data.mongodb.uri}") private val mongoUri: S
     }
 
     override fun findById(id: ObjectId): Actor? {
-        val document = collection.find(Document("_id", id)).first() ?: return null
-        return Actor(
-            document.getString("surname"),
-            document.getString("name"),
-            stringToLocale(document.getString("nationality")),
-            document.getDate("birthDate").toInstant().atZone(ZoneId.systemDefault()).toLocalDate(),
-            document.getDate("deathDate")?.toInstant()?.atZone(ZoneId.systemDefault())?.toLocalDate(),
-            document.getObjectId("_id")
-        )
+        return collection.findOneById(id)
     }
 
     override fun count(): Long {
@@ -58,14 +45,5 @@ class ActorDaoImpl(@Value("\${spring.data.mongodb.uri}") private val mongoUri: S
     override fun initTestData() {
         deleteAll()
         insertAll(listOf(bradPitt()))
-    }
-
-    private fun stringToLocale(localeString: String): Locale {
-        val parts = localeString.split("_")
-        return when (parts.size) {
-            1 -> Locale(parts[0])
-            2 -> Locale(parts[0], parts[1])
-            else -> throw IllegalArgumentException("Invalid locale format")
-        }
     }
 }
