@@ -37,7 +37,7 @@ internal class ActorResourceIntegrationTest(
 
     @Test
     fun `create should succeed and create an actor`() {
-        val actorRequest = ActorApiDto("surname", "name", Locale("", "FR"), false, LocalDate.of(1980, 1, 1), LocalDate.of(1990, 1, 1))
+        val actorRequest = ActorApiDto("surname", "name", Locale("", "FR"), LocalDate.of(1980, 1, 1), LocalDate.of(1990, 1, 1))
         val initialCount = actorDao.count()
         webTestClient.mutate().baseUrl("http://localhost:$port").build()
             .post()
@@ -56,7 +56,7 @@ internal class ActorResourceIntegrationTest(
                     assertThat(nationality).isEqualTo(actorRequest.nationality)
                     assertThat(birthDate).isEqualTo(actorRequest.birthDate)
                     assertThat(deathDate).isEqualTo(actorRequest.deathDate)
-                    assertThat(isAlive).isEqualTo(actorRequest.isAlive)
+                    assertThat(isAlive).isEqualTo(actorRequest.deathDate == null)
                 }
                 assertThat(actorDao.count()).isEqualTo(initialCount + 1)
                 val actor = actorDao.findById(ObjectId(body.id!!))
