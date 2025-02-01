@@ -28,7 +28,6 @@ class ActorResourceTest {
             "surname",
             "name",
             Locale("", "FR"),
-            false,
             LocalDate.of(1980, 1, 1),
             LocalDate.of(1990, 1, 1),
         )
@@ -59,7 +58,7 @@ class ActorResourceTest {
                 assertThat(it.nationality).isEqualTo(actorRequest.nationality)
                 assertThat(it.birthDate).isEqualTo(actorRequest.birthDate)
                 assertThat(it.deathDate).isEqualTo(actorRequest.deathDate)
-                assertThat(it.isAlive).isEqualTo(actorRequest.isAlive)
+                assertThat(it.isAlive).isEqualTo(actorRequest.deathDate == null)
             }
             .verifyComplete()
         verify(exactly = 1) { actorService.create(any<Actor>()) }
@@ -80,7 +79,7 @@ class ActorResourceTest {
                 assertThat(it.nationality).isEqualTo(actorRequest.nationality)
                 assertThat(it.birthDate).isEqualTo(actorRequest.birthDate)
                 assertThat(it.deathDate).isEqualTo(actorRequest.deathDate)
-                assertThat(it.isAlive).isEqualTo(actorRequest.isAlive)
+                assertThat(it.isAlive).isEqualTo(actorRequest.deathDate == null)
             }
             .verifyComplete()
         verify(exactly = 1) { actorService.findById(id) }
