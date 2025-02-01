@@ -21,9 +21,9 @@ import java.util.Locale
 
 class ActorServiceTest {
 
-    private val actorWithoutId = Actor("surname", "name", Locale("", "FR"), LocalDate.of(1980, 1, 1), LocalDate.of(1990, 1, 1))
+    private val actorWithoutId =
+        Actor("surname", "name", Locale.Builder().setRegion("FR").build(), LocalDate.of(1980, 1, 1), LocalDate.of(1990, 1, 1))
     private val actor = actorWithoutId.copy(id = ObjectId.get())
-
     private val actorRepository = mockk<ActorRepository>()
     private val actorService = ActorService(actorRepository)
 

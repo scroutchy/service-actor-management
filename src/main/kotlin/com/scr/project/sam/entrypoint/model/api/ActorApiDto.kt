@@ -5,9 +5,9 @@ import com.scr.project.sam.entrypoint.resource.validation.ValidationGroups.Actor
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Null
 import jakarta.validation.constraints.PastOrPresent
+import jakarta.validation.constraints.Pattern
 import org.jetbrains.annotations.NotNull
 import java.time.LocalDate
-import java.util.Locale
 
 @IsValidDeathDate
 data class ActorApiDto(
@@ -16,7 +16,8 @@ data class ActorApiDto(
     @field:NotBlank
     val name: String,
     @field:NotNull
-    val nationality: Locale,
+    @field:Pattern(regexp = "^[A-Z]{2}$")
+    val nationalityCode: String,
     @field:NotNull
     @field:PastOrPresent
     val birthDate: LocalDate,
@@ -24,6 +25,8 @@ data class ActorApiDto(
     val deathDate: LocalDate? = null,
     @field:Null(groups = [ActorRequest::class], message = "isAlive must be null in request")
     val isAlive: Boolean? = null,
+    @field:Null(groups = [ActorRequest::class])
+    val nationality: String? = null,
     @field:Null(groups = [ActorRequest::class])
     var id: String? = null
 )
