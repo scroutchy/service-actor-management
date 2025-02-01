@@ -2,7 +2,6 @@ package com.scr.project.sam.entrypoint.integration.resource
 
 import com.scr.project.sam.AbstractIntegrationTest
 import com.scr.project.sam.domains.actor.dao.ActorDao
-import com.scr.project.sam.domains.actor.dao.bradPitt
 import com.scr.project.sam.domains.actor.error.ActorExceptionHandler.ErrorResponse
 import com.scr.project.sam.entrypoint.mapper.toApiDto
 import com.scr.project.sam.entrypoint.model.api.ActorApiDto
@@ -74,7 +73,7 @@ internal class ActorResourceIntegrationTest(
 
     @Test
     fun `find should succeed and returns an actor response when id exists`() {
-        val actorResponse = bradPitt().toApiDto()
+        val actorResponse = actorDao.findAny()!!.toApiDto()
         webTestClient.mutate().baseUrl("http://localhost:$port").build()
             .get()
             .uri("$ACTOR_PATH$ID_PATH", actorResponse.id)
