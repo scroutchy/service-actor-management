@@ -2,8 +2,12 @@ package com.scr.project.sam.entrypoint.integration.resource
 
 import com.scr.project.sam.AbstractIntegrationTest
 import com.scr.project.sam.domains.actor.dao.ActorDao
+import com.scr.project.sam.domains.actor.dao.bradPitt
+import com.scr.project.sam.domains.actor.error.ActorExceptionHandler.ErrorResponse
+import com.scr.project.sam.entrypoint.mapper.toApiDto
 import com.scr.project.sam.entrypoint.model.api.ActorApiDto
-import com.scr.project.sam.entrypoint.resource.ActorResource.Companion.ACTOR_PATH
+import com.scr.project.sam.entrypoint.resource.ApiConstants.ACTOR_PATH
+import com.scr.project.sam.entrypoint.resource.ApiConstants.ID_PATH
 import org.assertj.core.api.Assertions.assertThat
 import org.bson.types.ObjectId
 import org.junit.jupiter.api.BeforeEach
@@ -29,12 +33,13 @@ internal class ActorResourceIntegrationTest(
 
     @BeforeEach
     fun setUp() {
-        actorDao.deleteAll()
+        actorDao.initTestData()
     }
 
     @Test
     fun `create should succeed and create an actor`() {
         val actorRequest = ActorApiDto("surname", "name", Locale("", "FR"), false, LocalDate.of(1980, 1, 1), LocalDate.of(1990, 1, 1))
+        val initialCount = actorDao.count()
         webTestClient.mutate().baseUrl("http://localhost:$port").build()
             .post()
             .uri(ACTOR_PATH)
@@ -54,7 +59,7 @@ internal class ActorResourceIntegrationTest(
                     assertThat(deathDate).isEqualTo(actorRequest.deathDate)
                     assertThat(isAlive).isEqualTo(actorRequest.isAlive)
                 }
-                assertThat(actorDao.count()).isEqualTo(1)
+                assertThat(actorDao.count()).isEqualTo(initialCount + 1)
                 val actor = actorDao.findById(ObjectId(body.id!!))
                 with(actor!!) {
                     assertThat(id).isEqualTo(ObjectId(body.id))
@@ -65,5 +70,39 @@ internal class ActorResourceIntegrationTest(
                     assertThat(deathDate).isEqualTo(body.deathDate)
                 }
             }
+    }
+
+    @Test
+    fun `find should succeed and returns an actor response when id exists`() {
+        val actorResponse = bradPitt().toApiDto()
+        webTestClient.mutate().baseUrl("http://localhost:$port").build()
+            .get()
+            .uri("$ACTOR_PATH$ID_PATH", actorResponse.id)
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(ActorApiDto::class.java)
+            .consumeWith {
+                val body = it.responseBody
+                assertThat(body).isNotNull
+                with(body!!) {
+                    assertThat(id).isEqualTo(actorResponse.id)
+                    assertThat(surname).isEqualTo(actorResponse.surname)
+                    assertThat(name).isEqualTo(actorResponse.name)
+                    assertThat(nationality).isEqualTo(actorResponse.nationality)
+                    assertThat(birthDate).isEqualTo(actorResponse.birthDate)
+                    assertThat(deathDate).isEqualTo(actorResponse.deathDate)
+                    assertThat(isAlive).isEqualTo(actorResponse.isAlive)
+                }
+            }
+    }
+
+    @Test
+    fun `find should return 404 when id does not exist`() {
+        webTestClient.mutate().baseUrl("http://localhost:$port").build()
+            .get()
+            .uri("$ACTOR_PATH$ID_PATH", ObjectId.get().toHexString())
+            .exchange()
+            .expectStatus().isNotFound
+            .expectBody(ErrorResponse::class.java)
     }
 }

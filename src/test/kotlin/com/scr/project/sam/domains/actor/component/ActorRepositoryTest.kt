@@ -2,6 +2,7 @@ package com.scr.project.sam.domains.actor.component
 
 import com.scr.project.sam.AbstractIntegrationTest
 import com.scr.project.sam.domains.actor.dao.ActorDao
+import com.scr.project.sam.domains.actor.dao.bradPitt
 import com.scr.project.sam.domains.actor.model.entity.Actor
 import com.scr.project.sam.domains.actor.repository.ActorRepository
 import org.assertj.core.api.Assertions.assertThat
@@ -23,12 +24,13 @@ internal class ActorRepositoryTest(
 
     @BeforeEach
     fun setUp() {
-        actorDao.deleteAll()
+        actorDao.initTestData()
     }
 
     @Test
     fun `insert should succeed`() {
         val actor = Actor("surname", "name", Locale("", "FR"), LocalDate.of(1980, 1, 1), LocalDate.of(1990, 1, 1))
+        val initialCount = actorDao.count()
         actorRepository.insert(actor)
             .test()
             .expectSubscription()
@@ -39,8 +41,34 @@ internal class ActorRepositoryTest(
                 assertThat(it.nationality).isEqualTo(actor.nationality)
                 assertThat(it.birthDate).isEqualTo(actor.birthDate)
                 assertThat(it.deathDate).isEqualTo(actor.deathDate)
-                assertThat(actorDao.count()).isEqualTo(1)
+                assertThat(actorDao.count()).isEqualTo(initialCount + 1)
             }
+            .verifyComplete()
+    }
+
+    @Test
+    fun `findById should succeed when id in database`() {
+        val actor = bradPitt()
+        actorRepository.findById(actor.id!!.toHexString())
+            .test()
+            .expectSubscription()
+            .consumeNextWith {
+                assertThat(it.id).isEqualTo(actor.id)
+                assertThat(it.name).isEqualTo(actor.name)
+                assertThat(it.surname).isEqualTo(actor.surname)
+                assertThat(it.nationality).isEqualTo(actor.nationality)
+                assertThat(it.birthDate).isEqualTo(actor.birthDate)
+                assertThat(it.deathDate).isEqualTo(actor.deathDate)
+            }
+            .verifyComplete()
+    }
+
+    @Test
+    fun `findById should return null when id not in database`() {
+        actorRepository.findById("dummyId")
+            .test()
+            .expectSubscription()
+            .expectNextCount(0)
             .verifyComplete()
     }
 }
