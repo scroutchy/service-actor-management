@@ -18,7 +18,6 @@ class ActorMappingsTest {
             "surname",
             "name",
             Locale("", "FR"),
-            true,
             LocalDate.of(1980, 1 ,1),
             LocalDate.of(1990, 1, 1),
         )
