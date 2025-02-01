@@ -1,5 +1,6 @@
 package com.scr.project.sam.domains.actor.service
 
+import com.scr.project.sam.domains.actor.error.OnActorNotFound
 import com.scr.project.sam.domains.actor.model.entity.Actor
 import com.scr.project.sam.domains.actor.repository.ActorRepository
 import io.mockk.clearMocks
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import reactor.kotlin.core.publisher.toMono
 import reactor.kotlin.test.test
+import reactor.kotlin.test.verifyError
 import java.time.LocalDate
 import java.util.Locale
 
@@ -63,5 +65,17 @@ class ActorServiceTest {
             }.verifyComplete()
         verify(exactly = 1) { actorRepository.findById(actor.id!!.toHexString()) }
         confirmVerified(actorRepository)
+    }
+
+    @Test
+    fun `findById should return exception when actor does not exist`() {
+        every { actorRepository.findById(actor.id!!.toHexString()) } answers { OnActorNotFound().toMono() }
+        actorService.findById(actor.id!!)
+            .test()
+            .expectSubscription()
+            .consumeSubscriptionWith {
+                verify(exactly = 1) { actorRepository.findById(actor.id!!.toHexString()) }
+                confirmVerified(actorRepository)
+            }.verifyError(OnActorNotFound::class)
     }
 }
