@@ -28,7 +28,6 @@ class ActorResourceTest {
             "surname",
             "name",
             Locale("", "FR"),
-            false,
             LocalDate.of(1980, 1, 1),
             LocalDate.of(1990, 1, 1),
         )
@@ -52,14 +51,16 @@ class ActorResourceTest {
             .test()
             .expectSubscription()
             .consumeNextWith {
-                assertThat(it).isNotNull()
-                assertThat(it.id).isNotNull()
-                assertThat(it.surname).isEqualTo(actorRequest.surname)
-                assertThat(it.name).isEqualTo(actorRequest.name)
-                assertThat(it.nationality).isEqualTo(actorRequest.nationality)
-                assertThat(it.birthDate).isEqualTo(actorRequest.birthDate)
-                assertThat(it.deathDate).isEqualTo(actorRequest.deathDate)
-                assertThat(it.isAlive).isEqualTo(actorRequest.isAlive)
+                with(it.body!!) {
+                    assertThat(it).isNotNull()
+                    assertThat(id).isNotNull
+                    assertThat(surname).isEqualTo(actorRequest.surname)
+                    assertThat(name).isEqualTo(actorRequest.name)
+                    assertThat(nationality).isEqualTo(actorRequest.nationality)
+                    assertThat(birthDate).isEqualTo(actorRequest.birthDate)
+                    assertThat(deathDate).isEqualTo(actorRequest.deathDate)
+                    assertThat(isAlive).isEqualTo(actorRequest.deathDate == null)
+                }
             }
             .verifyComplete()
         verify(exactly = 1) { actorService.create(any<Actor>()) }
@@ -80,7 +81,7 @@ class ActorResourceTest {
                 assertThat(it.nationality).isEqualTo(actorRequest.nationality)
                 assertThat(it.birthDate).isEqualTo(actorRequest.birthDate)
                 assertThat(it.deathDate).isEqualTo(actorRequest.deathDate)
-                assertThat(it.isAlive).isEqualTo(actorRequest.isAlive)
+                assertThat(it.isAlive).isEqualTo(actorRequest.deathDate == null)
             }
             .verifyComplete()
         verify(exactly = 1) { actorService.findById(id) }
