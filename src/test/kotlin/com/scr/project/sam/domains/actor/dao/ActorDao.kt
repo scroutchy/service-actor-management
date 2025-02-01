@@ -1,13 +1,12 @@
 package com.scr.project.sam.domains.actor.dao
 
 import com.scr.project.sam.domains.actor.model.entity.Actor
-import org.bson.types.ObjectId
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.stereotype.Repository
 
-interface ActorDao {
-    fun insert(actor: Actor)
-    fun insertAll(actors: List<Actor>)
-    fun findById(id: ObjectId): Actor?
-    fun count(): Long
-    fun deleteAll()
-    fun initTestData()
+@Repository
+class ActorDao(@Value("\${spring.data.mongodb.uri}") private val mongoUri: String) :
+    GenericDao<Actor>(mongoUri, Actor::class.java, "actor") {
+
+    override fun defaultEntities() = listOf(bradPitt(), jamesDean())
 }
