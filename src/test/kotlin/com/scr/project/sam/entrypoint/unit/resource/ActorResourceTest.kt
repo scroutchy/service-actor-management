@@ -19,7 +19,6 @@ import reactor.kotlin.core.publisher.toMono
 import reactor.kotlin.test.test
 import reactor.kotlin.test.verifyError
 import java.time.LocalDate
-import java.util.Locale
 
 class ActorResourceTest {
 
@@ -27,7 +26,7 @@ class ActorResourceTest {
         ActorApiDto(
             "surname",
             "name",
-            Locale("", "FR"),
+            "FR",
             LocalDate.of(1980, 1, 1),
             LocalDate.of(1990, 1, 1),
         )
@@ -52,13 +51,14 @@ class ActorResourceTest {
             .expectSubscription()
             .consumeNextWith {
                 assertThat(it).isNotNull()
-                assertThat(it.id).isNotNull()
+                assertThat(it.id).isNotNull
                 assertThat(it.surname).isEqualTo(actorRequest.surname)
                 assertThat(it.name).isEqualTo(actorRequest.name)
-                assertThat(it.nationality).isEqualTo(actorRequest.nationality)
+                assertThat(it.nationalityCode).isEqualTo(actorRequest.nationalityCode)
                 assertThat(it.birthDate).isEqualTo(actorRequest.birthDate)
                 assertThat(it.deathDate).isEqualTo(actorRequest.deathDate)
                 assertThat(it.isAlive).isEqualTo(actorRequest.deathDate == null)
+                assertThat(it.nationality).isNotNull
             }
             .verifyComplete()
         verify(exactly = 1) { actorService.create(any<Actor>()) }
@@ -76,10 +76,11 @@ class ActorResourceTest {
                 assertThat(it.id).isEqualTo(id.toHexString())
                 assertThat(it.surname).isEqualTo(actorRequest.surname)
                 assertThat(it.name).isEqualTo(actorRequest.name)
-                assertThat(it.nationality).isEqualTo(actorRequest.nationality)
+                assertThat(it.nationalityCode).isEqualTo(actorRequest.nationalityCode)
                 assertThat(it.birthDate).isEqualTo(actorRequest.birthDate)
                 assertThat(it.deathDate).isEqualTo(actorRequest.deathDate)
                 assertThat(it.isAlive).isEqualTo(actorRequest.deathDate == null)
+                assertThat(it.nationality).isNotNull
             }
             .verifyComplete()
         verify(exactly = 1) { actorService.findById(id) }

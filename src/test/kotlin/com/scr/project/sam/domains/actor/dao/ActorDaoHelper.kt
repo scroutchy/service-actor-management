@@ -8,7 +8,7 @@ import java.util.Locale
 fun bradPitt() = Actor(
     "Pitt",
     "Brad",
-    Locale("", "US"),
+    Locale.Builder().setRegion("US").build(),
     LocalDate.of(1963, 12, 18),
     null,
     ObjectId("679bf64bf44d492fd46eec9f"),
@@ -17,7 +17,7 @@ fun bradPitt() = Actor(
 fun jamesDean() = Actor(
     "Dean",
     "James",
-    Locale("", "US"),
+    Locale.Builder().setRegion("US").build(),
     LocalDate.of(1931, 2, 8),
     LocalDate.of(1955, 9, 30),
     ObjectId("679bf64bf44d492fd46eeca0")
