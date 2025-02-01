@@ -17,15 +17,16 @@ class ActorMappingsTest {
         val actorApiDto = ActorApiDto(
             "surname",
             "name",
-            Locale("", "FR"),
-            LocalDate.of(1980, 1 ,1),
+            "FR",
             LocalDate.of(1990, 1, 1),
+            LocalDate.of(1980, 1, 1),
+            nationality = "France",
         )
         val actor = actorApiDto.toEntity()
         assertThat(actor).isNotNull
         assertThat(actor.surname).isEqualTo(actorApiDto.surname)
         assertThat(actor.name).isEqualTo(actorApiDto.name)
-        assertThat(actor.nationality).isEqualTo(actorApiDto.nationality)
+        assertThat(actor.nationality).isEqualTo(Locale.Builder().setRegion(actorApiDto.nationalityCode).build())
         assertThat(actor.birthDate).isEqualTo(actorApiDto.birthDate)
         assertThat(actor.deathDate).isEqualTo(actorApiDto.deathDate)
     }
@@ -44,10 +45,11 @@ class ActorMappingsTest {
         assertThat(actorApiDto).isNotNull
         assertThat(actorApiDto.surname).isEqualTo(actor.surname)
         assertThat(actorApiDto.name).isEqualTo(actor.name)
-        assertThat(actorApiDto.nationality).isEqualTo(actor.nationality)
+        assertThat(actorApiDto.nationalityCode).isEqualTo(actor.nationality.country)
         assertThat(actorApiDto.birthDate).isEqualTo(actor.birthDate)
         assertThat(actorApiDto.deathDate).isEqualTo(actor.deathDate)
         assertThat(actorApiDto.isAlive).isFalse()
+        assertThat(actorApiDto.nationality).isEqualTo(actor.nationality.displayCountry)
         assertThat(actorApiDto.id).isEqualTo(actor.id?.toHexString())
     }
 
@@ -65,10 +67,11 @@ class ActorMappingsTest {
         assertThat(actorApiDto).isNotNull
         assertThat(actorApiDto.surname).isEqualTo(actor.surname)
         assertThat(actorApiDto.name).isEqualTo(actor.name)
-        assertThat(actorApiDto.nationality).isEqualTo(actor.nationality)
+        assertThat(actorApiDto.nationalityCode).isEqualTo(actor.nationality.country)
         assertThat(actorApiDto.birthDate).isEqualTo(actor.birthDate)
         assertThat(actorApiDto.deathDate).isNull()
         assertThat(actorApiDto.isAlive).isTrue()
+        assertThat(actorApiDto.nationality).isEqualTo(actor.nationality.displayCountry)
         assertThat(actorApiDto.id).isEqualTo(actor.id?.toHexString())
     }
 }
