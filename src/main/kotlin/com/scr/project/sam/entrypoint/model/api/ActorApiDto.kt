@@ -6,7 +6,6 @@ import jakarta.validation.constraints.Null
 import jakarta.validation.constraints.PastOrPresent
 import org.jetbrains.annotations.NotNull
 import java.time.LocalDate
-import java.util.Locale
 
 data class ActorApiDto(
     @field:NotBlank
@@ -14,7 +13,7 @@ data class ActorApiDto(
     @field:NotBlank
     val name: String,
     @field:NotNull
-    val nationality: Locale,
+    val nationalityCode: String,
     @field:NotNull
     @field:PastOrPresent
     val birthDate: LocalDate,
@@ -22,6 +21,8 @@ data class ActorApiDto(
     val deathDate: LocalDate? = null,
     @field:Null(groups = [ActorRequest::class], message = "isAlive must be null in request")
     val isAlive: Boolean? = null,
+    @field:Null(groups = [ActorRequest::class])
+    val nationality: String? = null,
     @field:Null(groups = [ActorRequest::class])
     var id: String? = null
 )

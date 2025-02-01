@@ -37,7 +37,13 @@ internal class ActorResourceIntegrationTest(
 
     @Test
     fun `create should succeed and create an actor`() {
-        val actorRequest = ActorApiDto("surname", "name", Locale("", "FR"), LocalDate.of(1980, 1, 1), LocalDate.of(1990, 1, 1))
+        val actorRequest = ActorApiDto(
+            "surname",
+            "name",
+            "FR",
+            LocalDate.of(1990, 1, 1),
+            LocalDate.of(1980, 1, 1)
+        )
         val initialCount = actorDao.count()
         webTestClient.mutate().baseUrl("http://localhost:$port").build()
             .post()
@@ -53,10 +59,11 @@ internal class ActorResourceIntegrationTest(
                     assertThat(id).isNotNull
                     assertThat(surname).isEqualTo(actorRequest.surname)
                     assertThat(name).isEqualTo(actorRequest.name)
-                    assertThat(nationality).isEqualTo(actorRequest.nationality)
+                    assertThat(nationalityCode).isEqualTo(actorRequest.nationalityCode)
                     assertThat(birthDate).isEqualTo(actorRequest.birthDate)
                     assertThat(deathDate).isEqualTo(actorRequest.deathDate)
                     assertThat(isAlive).isEqualTo(actorRequest.deathDate == null)
+                    assertThat(nationality).isNotNull
                 }
                 assertThat(actorDao.count()).isEqualTo(initialCount + 1)
                 val actor = actorDao.findById(ObjectId(body.id!!))
@@ -64,7 +71,7 @@ internal class ActorResourceIntegrationTest(
                     assertThat(id).isEqualTo(ObjectId(body.id))
                     assertThat(surname).isEqualTo(body.surname)
                     assertThat(name).isEqualTo(body.name)
-                    assertThat(nationality).isEqualTo(body.nationality)
+                    assertThat(nationality).isEqualTo(Locale("", body.nationalityCode))
                     assertThat(birthDate).isEqualTo(body.birthDate)
                     assertThat(deathDate).isEqualTo(body.deathDate)
                 }
