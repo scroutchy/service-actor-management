@@ -1,5 +1,6 @@
 package com.scr.project.sam.entrypoint.unit.resource
 
+import com.scr.project.sam.domains.actor.error.OnActorNotFound
 import com.scr.project.sam.domains.actor.model.entity.Actor
 import com.scr.project.sam.domains.actor.service.ActorService
 import com.scr.project.sam.entrypoint.mapper.toEntity
@@ -16,6 +17,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import reactor.kotlin.core.publisher.toMono
 import reactor.kotlin.test.test
+import reactor.kotlin.test.verifyError
 import java.time.LocalDate
 import java.util.Locale
 
@@ -83,5 +85,19 @@ class ActorResourceTest {
             .verifyComplete()
         verify(exactly = 1) { actorService.findById(id) }
         confirmVerified(actorService)
+    }
+
+    @Test
+    fun `find should return an exception when actor id is not exist`() {
+        val id = ObjectId.get()
+        every { actorService.findById(id) } answers { OnActorNotFound(id).toMono() }
+        actorResource.find(id)
+            .test()
+            .expectSubscription()
+            .consumeSubscriptionWith {
+                verify(exactly = 1) { actorService.findById(id) }
+                confirmVerified(actorService)
+            }
+            .verifyError(OnActorNotFound::class)
     }
 }

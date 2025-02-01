@@ -3,6 +3,7 @@ package com.scr.project.sam.entrypoint.integration.resource
 import com.scr.project.sam.AbstractIntegrationTest
 import com.scr.project.sam.domains.actor.dao.ActorDao
 import com.scr.project.sam.domains.actor.dao.bradPitt
+import com.scr.project.sam.domains.actor.error.ActorExceptionHandler.ErrorResponse
 import com.scr.project.sam.entrypoint.mapper.toApiDto
 import com.scr.project.sam.entrypoint.model.api.ActorApiDto
 import com.scr.project.sam.entrypoint.resource.ApiConstants.ACTOR_PATH
@@ -93,5 +94,15 @@ internal class ActorResourceIntegrationTest(
                     assertThat(isAlive).isEqualTo(actorResponse.isAlive)
                 }
             }
+    }
+
+    @Test
+    fun `find should return 404 when id does not exist`() {
+        webTestClient.mutate().baseUrl("http://localhost:$port").build()
+            .get()
+            .uri("$ACTOR_PATH$ID_PATH", ObjectId.get().toHexString())
+            .exchange()
+            .expectStatus().isNotFound
+            .expectBody(ErrorResponse::class.java)
     }
 }

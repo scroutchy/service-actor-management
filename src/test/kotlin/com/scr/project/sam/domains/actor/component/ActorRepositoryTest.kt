@@ -62,4 +62,13 @@ internal class ActorRepositoryTest(
             }
             .verifyComplete()
     }
+
+    @Test
+    fun `findById should return null when id not in database`() {
+        actorRepository.findById("dummyId")
+            .test()
+            .expectSubscription()
+            .expectNextCount(0)
+            .verifyComplete()
+    }
 }
