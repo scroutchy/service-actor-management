@@ -25,7 +25,7 @@ services:
 
 variables:
   DOCKER_DRIVER: overlay2
-  DOCKER_HOST: tcp://docker:2376/
+  DOCKER_HOST: unix:///var/run/docker.sock
   TESTCONTAINERS_HOST_OVERRIDE: "host.docker.internal"
   DOCKER_TLS_CERTDIR: "/certs"
   SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  # Defines the location of the analysis task cache
