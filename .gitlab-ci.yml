@@ -85,6 +85,11 @@ sonarcloud-check:
 deploy:
   stage: deploy
   when: manual
+  before_script:
+    - echo "$KUBECONFIG_CONTENT" > kubeconfig.yaml
+    - export KUBECONFIG=$(pwd)/kubeconfig.yaml
   script:
+    - kubectl cluster-info
+    - kubectl get nodes
     - kubectl apply -f ops/helm/mongo-deployment.yaml
     - kubectl apply -f ops/helm/springboot-deployment.yaml
