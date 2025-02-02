@@ -86,6 +86,7 @@ deploy:
   stage: deploy
   when: manual
   before_script:
+    - apk add kubectl
     - echo "$KUBECONFIG_CONTENT" > kubeconfig.yaml
     - export KUBECONFIG=$(pwd)/kubeconfig.yaml
   script:
