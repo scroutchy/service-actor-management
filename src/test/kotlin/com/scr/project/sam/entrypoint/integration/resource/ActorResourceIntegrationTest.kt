@@ -16,6 +16,7 @@ import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWeb
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
 import org.springframework.boot.test.web.server.LocalServerPort
+import org.springframework.http.HttpStatus.CONFLICT
 import org.springframework.test.web.reactive.server.WebTestClient
 import java.time.LocalDate
 import java.util.Locale
@@ -76,6 +77,25 @@ internal class ActorResourceIntegrationTest(
                     assertThat(deathDate).isEqualTo(body.deathDate)
                 }
             }
+    }
+
+    @Test
+    fun `create should fail when request contains surname and name that already exist`() {
+        val actorRequest = ActorApiDto(
+            "Pitt",
+            "Brad",
+            "FR",
+            LocalDate.of(1980, 1, 1),
+            LocalDate.of(1990, 1, 1)
+        )
+        val initialCount = actorDao.count()
+        webTestClient.mutate().baseUrl("http://localhost:$port").build()
+            .post()
+            .uri(ACTOR_PATH)
+            .bodyValue(actorRequest)
+            .exchange()
+            .expectStatus().isEqualTo(CONFLICT)
+        assertThat(actorDao.count()).isEqualTo(initialCount)
     }
 
     @Test
