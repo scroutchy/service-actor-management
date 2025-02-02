@@ -12,10 +12,11 @@
 image: gradle:jdk17-alpine
 
 before_script:
+  - apt-get update
+  - apt-get install -y docker.io
+  - docker --version
   - GRADLE_USER_HOME="$(pwd)/.gradle"
   - export GRADLE_USER_HOME
-  - apt-get update && apt-get install -y docker.io
-  - docker --version
 
 services:
   - name: docker:dind
