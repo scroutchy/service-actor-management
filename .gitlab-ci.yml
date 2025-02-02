@@ -79,6 +79,7 @@ sonarcloud-check:
 
 deploy:
   stage: deploy
+  when: manual
   script:
     - kubectl apply -f ops/helm/mongo-deployment.yaml
     - kubectl apply -f ops/helm/springboot-deployment.yaml
