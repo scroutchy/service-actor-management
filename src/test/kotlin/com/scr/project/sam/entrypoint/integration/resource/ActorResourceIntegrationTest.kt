@@ -16,6 +16,7 @@ import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWeb
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
 import org.springframework.boot.test.web.server.LocalServerPort
+import org.springframework.http.HttpStatus.CONFLICT
 import org.springframework.test.web.reactive.server.WebTestClient
 import java.time.LocalDate
 import java.util.Locale
@@ -37,14 +38,20 @@ internal class ActorResourceIntegrationTest(
 
     @Test
     fun `create should succeed and create an actor`() {
-        val actorRequest = ActorApiDto("surname", "name", Locale("", "FR"), false, LocalDate.of(1980, 1, 1), LocalDate.of(1990, 1, 1))
+        val actorRequest = ActorApiDto(
+            "surname",
+            "name",
+            "FR",
+            LocalDate.of(1980, 1, 1),
+            LocalDate.of(1990, 1, 1)
+        )
         val initialCount = actorDao.count()
         webTestClient.mutate().baseUrl("http://localhost:$port").build()
             .post()
             .uri(ACTOR_PATH)
             .bodyValue(actorRequest)
             .exchange()
-            .expectStatus().isOk
+            .expectStatus().isCreated
             .expectBody(ActorApiDto::class.java)
             .consumeWith {
                 val body = it.responseBody
@@ -53,10 +60,11 @@ internal class ActorResourceIntegrationTest(
                     assertThat(id).isNotNull
                     assertThat(surname).isEqualTo(actorRequest.surname)
                     assertThat(name).isEqualTo(actorRequest.name)
-                    assertThat(nationality).isEqualTo(actorRequest.nationality)
+                    assertThat(nationalityCode).isEqualTo(actorRequest.nationalityCode)
                     assertThat(birthDate).isEqualTo(actorRequest.birthDate)
                     assertThat(deathDate).isEqualTo(actorRequest.deathDate)
-                    assertThat(isAlive).isEqualTo(actorRequest.isAlive)
+                    assertThat(isAlive).isEqualTo(actorRequest.deathDate == null)
+                    assertThat(nationality).isNotNull
                 }
                 assertThat(actorDao.count()).isEqualTo(initialCount + 1)
                 val actor = actorDao.findById(ObjectId(body.id!!))
@@ -64,11 +72,30 @@ internal class ActorResourceIntegrationTest(
                     assertThat(id).isEqualTo(ObjectId(body.id))
                     assertThat(surname).isEqualTo(body.surname)
                     assertThat(name).isEqualTo(body.name)
-                    assertThat(nationality).isEqualTo(body.nationality)
+                    assertThat(nationality).isEqualTo(Locale("", body.nationalityCode))
                     assertThat(birthDate).isEqualTo(body.birthDate)
                     assertThat(deathDate).isEqualTo(body.deathDate)
                 }
             }
+    }
+
+    @Test
+    fun `create should fail when request contains surname and name that already exist`() {
+        val actorRequest = ActorApiDto(
+            "Pitt",
+            "Brad",
+            "FR",
+            LocalDate.of(1980, 1, 1),
+            LocalDate.of(1990, 1, 1)
+        )
+        val initialCount = actorDao.count()
+        webTestClient.mutate().baseUrl("http://localhost:$port").build()
+            .post()
+            .uri(ACTOR_PATH)
+            .bodyValue(actorRequest)
+            .exchange()
+            .expectStatus().isEqualTo(CONFLICT)
+        assertThat(actorDao.count()).isEqualTo(initialCount)
     }
 
     @Test
