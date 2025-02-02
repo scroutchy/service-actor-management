@@ -14,19 +14,20 @@ image: gradle:jdk17-alpine
 before_script:
   - apk update
   - apk add docker
-  - docker --version
+  - docker info
   - GRADLE_USER_HOME="$(pwd)/.gradle"
   - export GRADLE_USER_HOME
 
 services:
   - name: docker:dind
+    alias: docker
     command: ["--tls=false"]
 
 variables:
   DOCKER_DRIVER: overlay2
-  DOCKER_HOST: tcp://docker:2375/
+  DOCKER_HOST: tcp://docker:2376/
   TESTCONTAINERS_HOST_OVERRIDE: "host.docker.internal"
-  DOCKER_TLS_CERTDIR: ""
+  DOCKER_TLS_CERTDIR: "/certs"
   SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  # Defines the location of the analysis task cache
   GIT_DEPTH: "0"  # Tells git to fetch all the branches of the project, required by the analysis task
   IMAGE_NAME: "service-actor-management"
