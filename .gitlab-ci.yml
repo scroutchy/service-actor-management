@@ -14,7 +14,8 @@ image: gradle:jdk17-alpine
 before_script:
   - apk update
   - apk add docker
-  - docker info
+  - docker --version
+  - apk add kubectl
   - GRADLE_USER_HOME="$(pwd)/.gradle"
   - export GRADLE_USER_HOME
 
