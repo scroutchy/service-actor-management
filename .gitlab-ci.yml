@@ -12,20 +12,27 @@
 image: gradle:jdk17-alpine
 
 before_script:
+  - apk update
+  - apk add docker
+  - docker --version
+  - docker info
   - GRADLE_USER_HOME="$(pwd)/.gradle"
   - export GRADLE_USER_HOME
 
 services:
   - name: docker:dind
+    alias: docker
     command: ["--tls=false"]
 
 variables:
   DOCKER_DRIVER: overlay2
-  DOCKER_HOST: tcp://docker:2375/
+  DOCKER_HOST: unix:///var/run/docker.sock
   TESTCONTAINERS_HOST_OVERRIDE: "host.docker.internal"
-  DOCKER_TLS_CERTDIR: ""
+  # DOCKER_TLS_CERTDIR: "/certs"
   SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  # Defines the location of the analysis task cache
   GIT_DEPTH: "0"  # Tells git to fetch all the branches of the project, required by the analysis task
+  IMAGE_NAME: "service-actor-management"
+  REGISTRY: "registry.gitlab.com/cinema7590904"
 
 stages:
   - build
@@ -35,7 +42,11 @@ stages:
 
 build:
   stage: build
-  script: gradle --build-cache assemble
+  script:
+    - gradle --build-cache assemble
+    - docker build -t $REGISTRY/$IMAGE_NAME:latest .
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $REGISTRY
+    - docker push $REGISTRY/$IMAGE_NAME:latest
   cache:
     key: "$CI_COMMIT_REF_NAME"
     policy: push
@@ -72,6 +83,20 @@ sonarcloud-check:
   allow_failure: true
 
 deploy:
+  tags:
+    - minikube
   stage: deploy
-  script: echo "Define your deployment script!"
-  environment: production
+  when: manual
+  before_script:
+    - apk update
+    - apk add kubectl
+    - echo "$KUBECONFIG_CONTENT" > kubeconfig.yaml
+    - export KUBECONFIG=$(pwd)/kubeconfig.yaml
+    - kubectl config set-cluster minikube --server=https://192.168.49.2:8443/
+  script:
+    - kubectl config view
+    - kubectl config get-contexts
+    - kubectl cluster-info
+    - kubectl get nodes
+    - kubectl apply -f ops/helm/mongo-deployment.yaml
+    - kubectl apply -f ops/helm/springboot-deployment.yaml
