@@ -89,6 +89,7 @@ deploy:
     - apk add kubectl
     - echo "$KUBECONFIG_CONTENT" > kubeconfig.yaml
     - export KUBECONFIG=$(pwd)/kubeconfig.yaml
+    - cat kubeconfig.yaml
     - kubectl config set-cluster minikube --server=https://127.0.0.1:65506 --kubeconfig=kubeconfig.yaml
   script:
     - kubectl config view
