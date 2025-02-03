@@ -7,6 +7,10 @@ before_script:
   - apk add kubectl
   - GRADLE_USER_HOME="$(pwd)/.gradle"
   - export GRADLE_USER_HOME
+  - curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+  - chmod +x minikube
+  - mv minikube /usr/local/bin/
+  - minikube version  # ✅ Verify Minikube installation
 
 stages:
   - deploy
