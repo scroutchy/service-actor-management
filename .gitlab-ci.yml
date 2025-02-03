@@ -1,17 +1,5 @@
 image: gradle:jdk17-alpine
 
-before_script:
-  - apk update
-  - apk add docker
-  - docker --version
-  - apk add kubectl
-  - GRADLE_USER_HOME="$(pwd)/.gradle"
-  - export GRADLE_USER_HOME
-  - curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
-  - chmod +x minikube
-  - mv minikube /usr/local/bin/
-  - minikube version  # ✅ Verify Minikube installation
-
 stages:
   - deploy
 
@@ -21,6 +9,16 @@ deploy:
   stage: deploy
   when: manual
   before_script:
+    - apk update
+    - apk add docker
+    - docker --version
+    - apk add kubectl
+    - GRADLE_USER_HOME="$(pwd)/.gradle"
+    - export GRADLE_USER_HOME
+    - curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+    - chmod +x minikube
+    - mv minikube /usr/local/bin/
+    - minikube version  # ✅ Verify Minikube installation
     - eval $(minikube docker-env)  # ✅ Ensure Docker uses Minikube’s daemon
     - MINIKUBE_IP=$(minikube ip)   # ✅ Fetch Minikube’s IP dynamically
     - echo "Minikube IP is $MINIKUBE_IP"
