@@ -92,6 +92,7 @@ deploy:
     - kubectl config set-cluster minikube --server=https://127.0.0.1:65506
   script:
     - kubectl config view
+    - kubectl config get-contexts
     - kubectl get nodes
     - kubectl apply -f ops/helm/mongo-deployment.yaml
     - kubectl apply -f ops/helm/springboot-deployment.yaml
