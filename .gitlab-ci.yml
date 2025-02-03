@@ -87,14 +87,13 @@ deploy:
   when: manual
   before_script:
     - apk add kubectl
-    - echo "$KUBECONFIG_CONTENT"
-    - echo "$KUBECONFIG_CONTENT" > kubeconfig.yaml
+    - echo "$KUBECONFIG_CONTENT" | grep -v "client-certificate" | grep -v "client-key" | grep -v "certificate-authority" > kubeconfig.yaml
     - export KUBECONFIG=$(pwd)/kubeconfig.yaml
     - cat kubeconfig.yaml
-    - kubectl config set-cluster minikube --server=https://127.0.0.1:65506 --kubeconfig=KUBECONFIG
+    - kubectl config set-cluster minikube --server=https://127.0.0.1:65506 --kubeconfig=kubeconfig.yaml
   script:
     - kubectl config view
     - kubectl config get-contexts
-#    - kubectl get nodes
+    - kubectl get nodes
     - kubectl apply -f ops/helm/mongo-deployment.yaml
     - kubectl apply -f ops/helm/springboot-deployment.yaml
