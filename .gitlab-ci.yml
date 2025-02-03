@@ -18,7 +18,8 @@ deploy:
     - apk update && apk add curl  # ✅ Install curl
     - curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
     - chmod +x minikube
-    - mv minikube /usr/local/bin/
+    - mv minikube /usr/bin/  # ✅ Move to /usr/bin instead of /usr/local/bin
+    - export PATH=$PATH:/usr/bin/  # ✅ Ensure /usr/bin is in PATH
     - minikube version  # ✅ Verify Minikube installation
     - eval $(minikube docker-env)  # ✅ Ensure Docker uses Minikube’s daemon
     - MINIKUBE_IP=$(minikube ip)   # ✅ Fetch Minikube’s IP dynamically
