@@ -92,7 +92,7 @@ deploy:
     - echo "$KUBECONFIG_CONTENT" | grep -v "client-certificate" | grep -v "client-key" | grep -v "certificate-authority" > kubeconfig.yaml
     - export KUBECONFIG=$(pwd)/kubeconfig.yaml
     - cat kubeconfig.yaml
-    - kubectl config set-cluster minikube --kubeconfig=kubeconfig.yaml --server=https://127.0.0.1:64785
+    - kubectl config set-cluster minikube --kubeconfig=kubeconfig.yaml --server=https://192.168.49.2:64785
   script:
     - kubectl config view
     - kubectl config get-contexts
