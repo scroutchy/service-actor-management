@@ -83,6 +83,8 @@ stages:
 #  allow_failure: true
 
 deploy:
+  tags:
+    - minikube
   stage: deploy
   when: manual
   before_script:
