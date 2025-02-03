@@ -96,6 +96,7 @@ deploy:
   script:
     - kubectl config view
     - kubectl config get-contexts
+    - sleep 900
     - kubectl get nodes
     - kubectl apply -f ops/helm/mongo-deployment.yaml
     - kubectl apply -f ops/helm/springboot-deployment.yaml
