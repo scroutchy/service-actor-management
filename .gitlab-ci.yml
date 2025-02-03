@@ -88,7 +88,7 @@ deploy:
   stage: deploy
   when: manual
   before_script:
-    - apk add kubectl
+    - apk add kubectl:1.32.1
     - echo "$KUBECONFIG_CONTENT" | grep -v "client-certificate" | grep -v "client-key" | grep -v "certificate-authority" > kubeconfig.yaml
     - export KUBECONFIG=$(pwd)/kubeconfig.yaml
     - cat kubeconfig.yaml
