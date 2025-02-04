@@ -13,12 +13,8 @@ image: gradle:jdk17-alpine
 
 before_script:
   - apk update
-  - apk add docker curl
+  - apk add docker
   - docker --version
-  - curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
-  - chmod +x minikube && mv minikube /usr/local/bin/
-  - minikube version
-  - apk add kubectl
   - GRADLE_USER_HOME="$(pwd)/.gradle"
   - export GRADLE_USER_HOME
 
@@ -92,20 +88,17 @@ deploy:
   when: manual
   before_script:
     - apk add kubectl
-    - if ! minikube status; then
-        echo "❌ Minikube is not running! Please start it manually before running the pipeline."
-        exit 1
-      fi
-    - eval $(minikube docker-env)
-    - MINIKUBE_IP=$(minikube ip)
-    - echo "$KUBECONFIG_CONTENT" > kubeconfig.yaml
-    - export KUBECONFIG=$(pwd)/kubeconfig.yaml
-    - cat kubeconfig.yaml
-    - kubectl config set-cluster minikube --kubeconfig=kubeconfig.yaml --server=https://127.0.0.1:55014 #--insecure-skip-tls-verify=true
+   # - echo "$KUBECONFIG_CONTENT" > kubeconfig.yaml
+   # - export KUBECONFIG=$(pwd)/kubeconfig.yaml
+    - export KUBECONFIG=/root/.kube/config
+   # - cat kubeconfig.yaml
+   # - kubectl config set-cluster minikube --kubeconfig=KUBECONFIG --server=https://127.0.0.1:55014 #--insecure-skip-tls-verify=true
+    - kubectl config set-cluster minikube --server=https://192.168.1.25:139/
   script:
     - kubectl config view
     - kubectl config get-contexts
     #- sleep 900
+    - kubectl cluster-info
     - kubectl get nodes
     - kubectl apply -f ops/helm/mongo-deployment.yaml --validate=false
     - kubectl apply -f ops/helm/springboot-deployment.yaml
