@@ -15,7 +15,6 @@ before_script:
   - apk update
   - apk add docker
   - docker --version
-  - apk add kubectl
   - GRADLE_USER_HOME="$(pwd)/.gradle"
   - export GRADLE_USER_HOME
 
@@ -89,14 +88,19 @@ deploy:
   when: manual
   before_script:
     - apk add kubectl
-    - echo "$KUBECONFIG_CONTENT" > kubeconfig.yaml
-    - export KUBECONFIG=$(pwd)/kubeconfig.yaml
-    - cat kubeconfig.yaml
-    - kubectl config set-cluster minikube --kubeconfig=kubeconfig.yaml --server=https://127.0.0.1:55014 #--insecure-skip-tls-verify=true
+   # - echo "$KUBECONFIG_CONTENT" > kubeconfig.yaml
+   # - export KUBECONFIG=$(pwd)/kubeconfig.yaml
+    - export KUBECONFIG=/root/.kube/config
+   # - cat kubeconfig.yaml
+   # - kubectl config set-cluster minikube --kubeconfig=KUBECONFIG --server=https://127.0.0.1:55014  #--insecure-skip-tls-verify=true 
+    - ls -la /root/.kube
+    - ls -la /root/.minikube
+    - kubectl config set-cluster minikube --server=https://192.168.49.2:8443/
   script:
     - kubectl config view
     - kubectl config get-contexts
     #- sleep 900
-    - kubectl get nodes --as=system:serviceaccount:default:scr1-service-acc
-    - kubectl apply -f ops/helm/mongo-deployment.yaml --validate=false
+    - kubectl cluster-info
+    - kubectl get nodes
+    - kubectl apply -f ops/helm/mongo-deployment.yaml #--validate=false
     - kubectl apply -f ops/helm/springboot-deployment.yaml
