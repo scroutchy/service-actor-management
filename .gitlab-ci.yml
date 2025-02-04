@@ -92,7 +92,9 @@ deploy:
    # - export KUBECONFIG=$(pwd)/kubeconfig.yaml
     - export KUBECONFIG=/root/.kube/config
    # - cat kubeconfig.yaml
-   # - kubectl config set-cluster minikube --kubeconfig=KUBECONFIG --server=https://127.0.0.1:55014 #--insecure-skip-tls-verify=true
+   # - kubectl config set-cluster minikube --kubeconfig=KUBECONFIG --server=https://127.0.0.1:55014  #--insecure-skip-tls-verify=true 
+    - ls -la /root/.kube
+    - ls -la /root/.minikube
     - kubectl config set-cluster minikube --server=https://192.168.1.25:139/
   script:
     - kubectl config view
