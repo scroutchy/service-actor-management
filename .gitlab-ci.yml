@@ -102,5 +102,5 @@ deploy:
     #- sleep 900
     - kubectl cluster-info
     - kubectl get nodes
-    - kubectl apply -f ops/helm/mongo-deployment.yaml --validate=false
+    - kubectl apply -f ops/helm/mongo-deployment.yaml #--validate=false
     - kubectl apply -f ops/helm/springboot-deployment.yaml
