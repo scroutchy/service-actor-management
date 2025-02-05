@@ -1,3 +1,18 @@
+# Sealed Secret for MongoDB credentials
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  name: mongodb-secret
+  namespace: default
+spec:
+  encryptedData:
+    mongodb-uri: AgCfcLm61jw3hOtxmxeRUA/efk/LW4ar0xknc/9UlRlK1u+YqKdlKMbMF7bIxH3v/kOnymgxj9IXgmyUERSCRXBhFthzr514vuV8zWAocWfLzUwvG6x/Gxq8y5sRJGJ2dU9wAFK/fWudRA2fHO7iXkRtp+JS4T0hQKu7ufelOWecBpbpPdfBrTfqDoNCU2DtQwXnwZtxT37sy/WviHYWamLA3enP6DraDqp1ILAnhGaZzJR2qF51QATO6zvAKKONa3O+Q3mgIXbRbQ7Qua8MSXUB4PD78XDX7Ibi8K9Pr01pBu1wupIwJVnS4xNZ+v3nTUlpCGveWZGj0MX8F88aega24gwRYf+Y+VyahpPh3RgR344x+kNT3Lb2SwuUcYwE8nS7QPDJp/f6NR07c+PkYr0Doh1JpfCKjGfEAYkSh+4BWJHclhKaQfh/FcTbbg2+KHSQAZlT8uD2czXL7KrwE61y7YG2CBMeeBbvowUUyqIlGKA+v2DNkYWdbKWUmwrwOQzl3TRFKkpS9cZ6q4JIxFBeu8eZiDo+RNuY+Zrl0GuSy9QZFjl58TjzTXRHBbeHudenFcHRvLfZppuZtXmMQ6yDEahncmPofFIhPhPAv5Ut9fLG1BTTtZ/CxGnhgRLxahwgnzPgek3s3GB90oU9/V8SlAz92ld7bSaNsNl7b6Ufn7JXF93N2pcVBce53thqk0CsiFyawRVhIFPVPhDUECcW/dY1bp4vu0vQjgVcJzE5VkkItT35bMbaCEr2pvFv7oH8L0oVsepfF0Eb2nhs5caVB+n+tqLgCyIOuZ2eth5Adn6lzdLN5A==
+  template:
+    metadata:
+      name: mongodb-secret
+      namespace: default
+    type: Opaque
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -19,7 +34,10 @@ spec:
             - containerPort: 8080
           env:
             - name: SPRING_DATA_MONGODB_URI
-              value: "mongodb://root:example@mongodb-service:27017/service-actor-management?authSource=admin"
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb-secret
+                  key: mongodb-uri
 ---
 apiVersion: v1
 kind: Service
