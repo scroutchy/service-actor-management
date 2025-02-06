@@ -3,4 +3,4 @@ spring:
     name: service-actor-management
   data:
     mongodb:
-      uri: mongodb://mongodb:27017/service-actor-management
+      uri: mongodb://mongodb:27017/test

@@ -89,11 +89,12 @@ deploy:
   when: manual
   before_script:
     - apk update
-    - apk add kubectl curl bash
+#    - apk add kubectl curl bash
+    - apk add curl bash
     - curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
     - echo "$KUBECONFIG_CONTENT" > kubeconfig.yaml
     - export KUBECONFIG=$(pwd)/kubeconfig.yaml
-    - kubectl config set-cluster minikube --server=https://192.168.49.2:8443/
+#    - kubectl config set-cluster minikube --server=https://192.168.49.2:8443/
   script:
     - kubectl config view
     - kubectl config get-contexts
