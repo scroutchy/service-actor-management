@@ -45,7 +45,7 @@ build:
   script:
     - gradle --build-cache assemble
     - docker build -t $REGISTRY/$IMAGE_NAME:latest .
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $REGISTRY
+    - echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $REGISTRY
     - docker push $REGISTRY/$IMAGE_NAME:latest
   cache:
     key: "$CI_COMMIT_REF_NAME"
@@ -89,7 +89,8 @@ deploy:
   when: manual
   before_script:
     - apk update
-    - apk add kubectl
+    - apk add kubectl curl bash
+    - curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
     - echo "$KUBECONFIG_CONTENT" > kubeconfig.yaml
     - export KUBECONFIG=$(pwd)/kubeconfig.yaml
     - kubectl config set-cluster minikube --server=https://192.168.49.2:8443/
@@ -98,4 +99,5 @@ deploy:
     - kubectl config get-contexts
     - kubectl cluster-info
     - kubectl get nodes
-    - kubectl apply -f ops/helm/springboot-deployment.yaml
+    - helm version
+    - helm upgrade --install springboot-app ./ops/springboot-app --debug
