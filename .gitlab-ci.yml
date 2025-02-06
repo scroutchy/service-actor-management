@@ -88,12 +88,16 @@ publish:
     - apk add --no-cache docker
     - docker version
     - echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $REGISTRY
+    - IMAGE_TAG=${CI_COMMIT_REF_SLUG}
   script:
     - ls -la build/libs/
-    - docker build -t $REGISTRY/$IMAGE_NAME:latest .
-    - docker push $REGISTRY/$IMAGE_NAME:latest
+    - docker build -t $REGISTRY/$IMAGE_NAME:$IMAGE_TAG .
+    - docker push $REGISTRY/$IMAGE_NAME:$IMAGE_TAG
   dependencies:
     - build
+  artifacts:
+    paths:
+      - build/libs/*.jar
 
 
 deploy:
@@ -115,4 +119,4 @@ deploy:
 #    - kubectl cluster-info
 #    - kubectl get nodes
     - helm version
-    - helm upgrade --install springboot-app ./ops/springboot-app --debug
+    - helm upgrade --install springboot-app ./ops/springboot-app --set image.tag=${CI_COMMIT_REF_SLUG} --debug
