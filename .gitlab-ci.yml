@@ -76,6 +76,11 @@ sonarcloud-check:
       - .sonar/cache
   script: gradle sonar
   allow_failure: true
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_COMMIT_BRANCH != "main" && $CI_PIPELINE_SOURCE != "merge_request_event"'
+      when: manual
+    - when: never
 
 publish:
   stage: publish
