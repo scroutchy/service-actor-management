@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "springboot-app.fullname" . }}
+  labels:
+    app: {{ include "springboot-app.name" . }}
+    version: {{ include "springboot-app.name" . }}-{{ .Values.image.tag }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "springboot-app.name" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "springboot-app.name" . }}
+        version: {{ include "springboot-app.name" . }}-{{ .Values.image.tag }}
+    spec:
+      containers:
+        - name: {{ include "springboot-app.name" . }}
+          version: {{ include "springboot-app.name" . }}-{{ .Values.image.tag }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.service.port }}
+          env:
+            - name: SPRING_DATA_MONGODB_URI
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb-secret
+                  key: mongodbUri
+          resources:
+            requests:
+              ephemeral-storage: {{ .Values.resources.requests.ephemeralStorage }}
+              memory: {{ .Values.resources.requests.memory }}
+              cpu: {{ .Values.resources.requests.cpu }}
+            limits:
+              memory: {{ .Values.resources.limits.memory }}
+              cpu: {{ .Values.resources.limits.cpu }}

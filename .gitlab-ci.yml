@@ -11,14 +11,6 @@
 
 image: gradle:jdk17-alpine
 
-before_script:
-  - apk update
-  - apk add docker
-  - docker --version
-  - docker info
-  - GRADLE_USER_HOME="$(pwd)/.gradle"
-  - export GRADLE_USER_HOME
-
 services:
   - name: docker:dind
     alias: docker
@@ -28,7 +20,6 @@ variables:
   DOCKER_DRIVER: overlay2
   DOCKER_HOST: unix:///var/run/docker.sock
   TESTCONTAINERS_HOST_OVERRIDE: "host.docker.internal"
-  # DOCKER_TLS_CERTDIR: "/certs"
   SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  # Defines the location of the analysis task cache
   GIT_DEPTH: "0"  # Tells git to fetch all the branches of the project, required by the analysis task
   IMAGE_NAME: "service-actor-management"
@@ -38,21 +29,23 @@ stages:
   - build
   - test
   - sonar
+  - publish
   - deploy
 
 build:
   stage: build
   script:
     - gradle --build-cache assemble
-    - docker build -t $REGISTRY/$IMAGE_NAME:latest .
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $REGISTRY
-    - docker push $REGISTRY/$IMAGE_NAME:latest
   cache:
     key: "$CI_COMMIT_REF_NAME"
     policy: push
     paths:
       - build
       - .gradle
+  artifacts:
+    paths:
+      - build/libs/service-actor-management-0.0.1-SNAPSHOT.jar
+    expire_in: 1 day
 
 test:
   stage: test
@@ -63,6 +56,8 @@ test:
     paths:
       - build
       - .gradle
+  dependencies:
+    - build
   artifacts:
     reports:
       junit: build/test-results/test/**/TEST-*.xml
@@ -81,6 +76,29 @@ sonarcloud-check:
       - .sonar/cache
   script: gradle sonar
   allow_failure: true
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_COMMIT_BRANCH != "main" && $CI_PIPELINE_SOURCE != "merge_request_event"'
+      when: manual
+    - when: never
+
+publish:
+  stage: publish
+  before_script:
+    - apk add --no-cache docker
+    - docker version
+    - echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $REGISTRY
+    - IMAGE_TAG=${CI_COMMIT_REF_SLUG}
+  script:
+    - ls -la build/libs/
+    - docker build -t $REGISTRY/$IMAGE_NAME:$IMAGE_TAG .
+    - docker push $REGISTRY/$IMAGE_NAME:$IMAGE_TAG
+  dependencies:
+    - build
+  artifacts:
+    paths:
+      - build/libs/*.jar
+
 
 deploy:
   tags:
@@ -89,13 +107,16 @@ deploy:
   when: manual
   before_script:
     - apk update
-    - apk add kubectl
+#    - apk add kubectl curl bash
+    - apk add curl bash
+    - curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
     - echo "$KUBECONFIG_CONTENT" > kubeconfig.yaml
     - export KUBECONFIG=$(pwd)/kubeconfig.yaml
-    - kubectl config set-cluster minikube --server=https://192.168.49.2:8443/
+#    - kubectl config set-cluster minikube --server=https://192.168.49.2:8443/
   script:
-    - kubectl config view
-    - kubectl config get-contexts
-    - kubectl cluster-info
-    - kubectl get nodes
-    - kubectl apply -f ops/helm/springboot-deployment.yaml
+#    - kubectl config view
+#    - kubectl config get-contexts
+#    - kubectl cluster-info
+#    - kubectl get nodes
+    - helm version
+    - helm upgrade --install springboot-app ./ops/springboot-app --set image.tag=${CI_COMMIT_REF_SLUG} --debug
