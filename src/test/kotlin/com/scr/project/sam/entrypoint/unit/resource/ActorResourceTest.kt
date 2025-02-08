@@ -1,10 +1,12 @@
 package com.scr.project.sam.entrypoint.unit.resource
 
-import com.scr.project.sam.domains.actor.error.OnActorNotFound
+import com.scr.project.sam.domains.actor.error.ActorErrors.OnActorNotFound
+import com.scr.project.sam.domains.actor.model.business.ActorUpdateRequest
 import com.scr.project.sam.domains.actor.model.entity.Actor
 import com.scr.project.sam.domains.actor.service.ActorService
 import com.scr.project.sam.entrypoint.mapper.toEntity
 import com.scr.project.sam.entrypoint.model.api.ActorApiDto
+import com.scr.project.sam.entrypoint.model.api.ActorUpdateRequestApiDto
 import com.scr.project.sam.entrypoint.resource.ActorResource
 import io.mockk.clearMocks
 import io.mockk.confirmVerified
@@ -30,6 +32,7 @@ class ActorResourceTest {
             LocalDate.of(1980, 1, 1),
             LocalDate.of(1990, 1, 1),
         )
+    private val updateActorRequest = ActorUpdateRequestApiDto(LocalDate.now())
     private val actorService = mockk<ActorService>()
     private val actorResource = ActorResource(actorService)
 
@@ -97,6 +100,45 @@ class ActorResourceTest {
             .expectSubscription()
             .consumeSubscriptionWith {
                 verify(exactly = 1) { actorService.findById(id) }
+                confirmVerified(actorService)
+            }
+            .verifyError(OnActorNotFound::class)
+    }
+
+    @Test
+    fun `update should succeed and update actor`() {
+        val id = ObjectId.get()
+        every { actorService.update(ActorUpdateRequest(id, updateActorRequest.deathDate)) } answers {
+            actorRequest.toEntity().copy(id = id, deathDate = updateActorRequest.deathDate).toMono()
+        }
+        actorResource.patch(id, updateActorRequest)
+            .test()
+            .expectSubscription()
+            .consumeNextWith {
+                assertThat(it).isNotNull()
+                assertThat(it.id).isEqualTo(id.toHexString())
+                assertThat(it.surname).isEqualTo(actorRequest.surname)
+                assertThat(it.name).isEqualTo(actorRequest.name)
+                assertThat(it.nationalityCode).isEqualTo(actorRequest.nationalityCode)
+                assertThat(it.birthDate).isEqualTo(actorRequest.birthDate)
+                assertThat(it.deathDate).isEqualTo(updateActorRequest.deathDate)
+                assertThat(it.isAlive).isFalse()
+                assertThat(it.nationality).isNotNull
+            }
+            .verifyComplete()
+        verify(exactly = 1) { actorService.update(ActorUpdateRequest(id, updateActorRequest.deathDate)) }
+        confirmVerified(actorService)
+    }
+
+    @Test
+    fun `update should return an exception when actor id does not exist`() {
+        val id = ObjectId.get()
+        every { actorService.update(ActorUpdateRequest(id, LocalDate.now())) } answers { OnActorNotFound(id).toMono() }
+        actorResource.patch(id, ActorUpdateRequestApiDto(LocalDate.now()))
+            .test()
+            .expectSubscription()
+            .consumeSubscriptionWith {
+                verify(exactly = 1) { actorService.update(any()) }
                 confirmVerified(actorService)
             }
             .verifyError(OnActorNotFound::class)

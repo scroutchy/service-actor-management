@@ -3,10 +3,13 @@ package com.scr.project.sam.entrypoint.resource
 import com.scr.project.sam.domains.actor.service.ActorService
 import com.scr.project.sam.entrypoint.mapper.toApiDto
 import com.scr.project.sam.entrypoint.mapper.toEntity
+import com.scr.project.sam.entrypoint.mapper.toUpdateRequest
 import com.scr.project.sam.entrypoint.model.api.ActorApiDto
+import com.scr.project.sam.entrypoint.model.api.ActorUpdateRequestApiDto
 import com.scr.project.sam.entrypoint.resource.ApiConstants.ACTOR_PATH
 import com.scr.project.sam.entrypoint.resource.ApiConstants.ID_PATH
 import com.scr.project.sam.entrypoint.resource.validation.ValidationGroups.ActorRequest
+import jakarta.validation.Valid
 import jakarta.validation.groups.Default
 import org.bson.types.ObjectId
 import org.slf4j.Logger
@@ -15,6 +18,7 @@ import org.springframework.http.HttpStatus.CREATED
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -43,5 +47,14 @@ class ActorResource(val actorService: ActorService) {
             .map { it.toApiDto() }
             .doOnSubscribe { logger.debug("Find request received") }
             .doOnSuccess { logger.info("Finding actor request with id {${it.id}} successfully handled") }
+    }
+
+    @PatchMapping(ID_PATH)
+    fun patch(@PathVariable id: ObjectId, @RequestBody @Valid request: ActorUpdateRequestApiDto): Mono<ActorApiDto> {
+        return actorService.update(request.toUpdateRequest(id))
+            .map { it.toApiDto() }
+            .doOnSubscribe { logger.debug("Update request received") }
+            .doOnSuccess { logger.info("Update request for actor with id {${it.id}} successfully handled") }
+            .doOnError { logger.warn("Error at processing update request for actor with id {${id}}") }
     }
 }

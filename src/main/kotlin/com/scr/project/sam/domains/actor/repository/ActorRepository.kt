@@ -1,9 +1,10 @@
 package com.scr.project.sam.domains.actor.repository
 
+import com.scr.project.sam.domains.actor.model.business.ActorUpdateRequest
 import com.scr.project.sam.domains.actor.model.entity.Actor
-import org.springframework.data.mongodb.repository.ReactiveMongoRepository
-import org.springframework.stereotype.Repository
+import reactor.core.publisher.Mono
 
-@Repository
-interface ActorRepository: ReactiveMongoRepository<Actor, String> {
+fun interface ActorRepository {
+
+    fun update(updateRequest: ActorUpdateRequest): Mono<Actor>
 }
