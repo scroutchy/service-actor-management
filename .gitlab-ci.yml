@@ -68,6 +68,10 @@ test:
       - build/reports/jacoco/test/jacocoTestReport.xml
   coverage: '/Total.*?([0-9,.]{1,5})%/'
 
+gemnasium-maven-dependency_scanning:
+  before_script:
+    - chmod +x gradlew
+
 sonarcloud-check:
   stage: sonar
   cache:
@@ -120,3 +124,7 @@ deploy:
 #    - kubectl get nodes
     - helm version
     - helm upgrade --install springboot-app ./ops/springboot-app --set image.tag=${CI_COMMIT_REF_SLUG} --debug
+
+include:
+  - template: Security/Dependency-Scanning.gitlab-ci.yml
+    path: /

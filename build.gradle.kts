@@ -9,6 +9,10 @@ plugins {
 
 group = "com.scr.project"
 version = "0.0.1-SNAPSHOT"
+private val jakartaValidationVersion = "3.0.2"
+private val nettyHandlerVersion = "4.1.118.Final"
+private val kMongoVersion = "4.10.0"
+private val mockkVersion = "1.12.0"
 
 java {
 	toolchain {
@@ -28,16 +32,17 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-validation")
 	implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
-    implementation("jakarta.validation:jakarta.validation-api:3.0.2")
+    implementation("jakarta.validation:jakarta.validation-api:$jakartaValidationVersion")
+    implementation("io.netty:netty-handler:$nettyHandlerVersion")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.boot:spring-boot-starter-webflux")
 	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
 	testImplementation("io.projectreactor:reactor-test")
 	testImplementation("org.testcontainers:testcontainers")
 	testImplementation("org.testcontainers:junit-jupiter")
-    testImplementation("org.litote.kmongo:kmongo:4.10.0")
+    testImplementation("org.litote.kmongo:kmongo:$kMongoVersion")
 	testImplementation("org.testcontainers:mongodb")
-	testImplementation("io.mockk:mockk:1.12.0")
+    testImplementation("io.mockk:mockk:$mockkVersion")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
