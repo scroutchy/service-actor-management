@@ -2,7 +2,9 @@ package com.scr.project.sam.entrypoint.integration.resource
 
 import com.scr.project.sam.AbstractIntegrationTest
 import com.scr.project.sam.domains.actor.dao.ActorDao
+import com.scr.project.sam.domains.actor.dao.bradPitt
 import com.scr.project.sam.domains.actor.error.ActorExceptionHandler.ErrorResponse
+import com.scr.project.sam.domains.actor.model.entity.Actor
 import com.scr.project.sam.entrypoint.mapper.toApiDto
 import com.scr.project.sam.entrypoint.model.api.ActorApiDto
 import com.scr.project.sam.entrypoint.model.api.ActorUpdateRequestApiDto
@@ -17,10 +19,14 @@ import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWeb
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
 import org.springframework.boot.test.web.server.LocalServerPort
+import org.springframework.http.HttpHeaders.CONTENT_RANGE
 import org.springframework.http.HttpStatus.CONFLICT
+import org.springframework.http.HttpStatus.PARTIAL_CONTENT
 import org.springframework.test.web.reactive.server.WebTestClient
+import org.springframework.test.web.reactive.server.WebTestClient.ListBodySpec
 import java.time.LocalDate
 import java.util.Locale
+import kotlin.random.Random
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @AutoConfigureWebTestClient
@@ -219,5 +225,146 @@ internal class ActorResourceIntegrationTest(
             .exchange()
             .expectStatus().isBadRequest
             .expectBody(Exception::class.java)
+    }
+
+    @Test
+    fun `list should return all actors including the dead ones when includeDeadIndicator is true`() {
+        actorDao.deleteAll()
+        val actors = generateListOfActors(5)
+        actorDao.insertAll(actors)
+        webTestClient.mutate().baseUrl("http://localhost:$port").build()
+            .get()
+            .uri("$ACTOR_PATH?includeDeadIndicator=true")
+            .exchange()
+            .expectStatus().isOk
+            .expectBodyList(ActorApiDto::class.java)
+            .consumeWith<ListBodySpec<ActorApiDto>> {
+                val headers = it.responseHeaders
+                assertThat(headers).isNotNull
+                assertThat(headers.get(CONTENT_RANGE)).isEqualTo(listOf("actors 0-4/5"))
+                val body = it.responseBody
+                assertThat(body).isNotNull
+                assertThat(body).hasSize(actors.size)
+                body!!.forEach { actorDto ->
+                    val actor = actors.find { a -> a.id!!.toHexString() == actorDto.id }
+                    assertThat(actor).isNotNull
+                    with(actor!!) {
+                        assertThat(actorDto.id).isEqualTo(id!!.toHexString())
+                        assertThat(actorDto.surname).isEqualTo(surname)
+                        assertThat(actorDto.name).isEqualTo(name)
+                        assertThat(actorDto.nationalityCode).isEqualTo(nationality.country)
+                        assertThat(actorDto.birthDate).isEqualTo(birthDate)
+                        assertThat(actorDto.deathDate).isEqualTo(deathDate)
+                        assertThat(actorDto.isAlive).isEqualTo(deathDate == null)
+                    }
+                }
+            }
+    }
+
+    @Test
+    fun `list should return all actors except dead ones when no indicator explicitly provided`() {
+        actorDao.deleteAll()
+        val livingActor = Actor("Live", "Guy", Locale.Builder().setRegion("US").build(), LocalDate.of(1980, 1, 1))
+        val deadActor = Actor("Dead", "Guy", Locale.Builder().setRegion("US").build(), LocalDate.of(1980, 1, 1), LocalDate.of(2000, 1, 1))
+        val otherActors = generateListOfActors(4)
+        val actors = listOf(livingActor, deadActor).plus(otherActors)
+        actorDao.insertAll(actors)
+        val livingActorNumber = actorDao.findAllBy { it.deathDate == null }.count()
+        webTestClient.mutate().baseUrl("http://localhost:$port").build()
+            .get()
+            .uri(ACTOR_PATH)
+            .exchange()
+            .expectStatus().isOk
+            .expectBodyList(ActorApiDto::class.java)
+            .consumeWith<ListBodySpec<ActorApiDto>> {
+                val headers = it.responseHeaders
+                assertThat(headers).isNotNull
+                assertThat(headers.get(CONTENT_RANGE)).isEqualTo(listOf("actors 0-${livingActorNumber - 1}/${livingActorNumber}"))
+                val body = it.responseBody
+                assertThat(body).isNotNull
+                assertThat(body).hasSizeLessThan(actorDao.count().toInt()).hasSizeGreaterThanOrEqualTo(1)
+                body!!.forEach { actorDto ->
+                    val actor = actors.find { a -> a.id!!.toHexString() == actorDto.id }
+                    assertThat(actor).isNotNull
+                    with(actor!!) {
+                        assertThat(actorDto.id).isEqualTo(id!!.toHexString())
+                        assertThat(actorDto.surname).isEqualTo(surname)
+                        assertThat(actorDto.name).isEqualTo(name)
+                        assertThat(actorDto.nationalityCode).isEqualTo(nationality.country)
+                        assertThat(actorDto.birthDate).isEqualTo(birthDate)
+                        assertThat(actorDto.deathDate).isEqualTo(deathDate)
+                        assertThat(actorDto.isAlive).isEqualTo(deathDate == null)
+                    }
+                }
+            }
+    }
+
+    @Test
+    fun `list should return a subset of actors when includeDeadIndicator is true and total number is greater than default page size`() {
+        actorDao.deleteAll()
+        val actors = generateListOfActors(15)
+        actorDao.insertAll(actors)
+        webTestClient.mutate().baseUrl("http://localhost:$port").build()
+            .get()
+            .uri("$ACTOR_PATH?includeDeadIndicator=true")
+            .exchange()
+            .expectStatus().isEqualTo(PARTIAL_CONTENT)
+            .expectBodyList(ActorApiDto::class.java)
+            .consumeWith<ListBodySpec<ActorApiDto>> {
+                val headers = it.responseHeaders
+                assertThat(headers).isNotNull
+                assertThat(headers.get(CONTENT_RANGE)).isEqualTo(listOf("actors 0-9/10"))
+                val body = it.responseBody
+                assertThat(body).isNotNull
+                assertThat(body).hasSize(10)
+                body!!.forEach { actorDto ->
+                    val actor = actors.find { a -> a.id!!.toHexString() == actorDto.id }
+                    assertThat(actor).isNotNull
+                    with(actor!!) {
+                        assertThat(actorDto.id).isEqualTo(id!!.toHexString())
+                        assertThat(actorDto.surname).isEqualTo(surname)
+                        assertThat(actorDto.name).isEqualTo(name)
+                        assertThat(actorDto.nationalityCode).isEqualTo(nationality.country)
+                        assertThat(actorDto.birthDate).isEqualTo(birthDate)
+                        assertThat(actorDto.deathDate).isEqualTo(deathDate)
+                        assertThat(actorDto.isAlive).isEqualTo(deathDate == null)
+                    }
+                }
+            }
+    }
+
+    @Test
+    fun `list should return an empty list when no data`() {
+        actorDao.deleteAll()
+        webTestClient.mutate().baseUrl("http://localhost:$port").build()
+            .get()
+            .uri("$ACTOR_PATH?includeDeadIndicator=true")
+            .exchange()
+            .expectStatus().isOk
+            .expectBodyList(ActorApiDto::class.java)
+            .consumeWith<ListBodySpec<ActorApiDto>> {
+                val headers = it.responseHeaders
+                assertThat(headers).isNotNull
+                assertThat(headers.get(CONTENT_RANGE)).isEqualTo(listOf("actors */0"))
+                val body = it.responseBody
+                assertThat(body).isNotNull
+                assertThat(body).isEmpty()
+            }
+    }
+
+    private fun generateListOfActors(size: Int): List<Actor> {
+        return List(size) {
+            bradPitt().copy(
+                id = ObjectId.get(),
+                name = generateRandomString(),
+                deathDate = Random.nextBoolean().takeIf { it }?.let { bradPitt().birthDate.plusDays(10) })
+        }
+    }
+
+    private fun generateRandomString(): String {
+        val allowedChars = ('A'..'Z') + ('a'..'z')
+        return (1..5)
+            .map { allowedChars.random() }
+            .joinToString("")
     }
 }

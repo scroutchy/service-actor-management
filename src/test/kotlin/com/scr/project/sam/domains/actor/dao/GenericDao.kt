@@ -5,9 +5,10 @@ import org.bson.types.ObjectId
 import org.litote.kmongo.KMongo
 import org.litote.kmongo.deleteMany
 import org.litote.kmongo.findOneById
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
-import org.testcontainers.shaded.com.google.common.base.Predicate
+import java.util.function.Predicate
 
 @Component
 abstract class GenericDao<T : Any>(
@@ -16,9 +17,15 @@ abstract class GenericDao<T : Any>(
     collectionName: String,
 ) {
 
+    private val logger = LoggerFactory.getLogger(GenericDao::class.java)
     private val client = KMongo.createClient(mongoUri)
     private val database = client.getDatabase("test")
     protected val collection: MongoCollection<T> = database.getCollection(collectionName, entityClass)
+
+    init {
+        logger.info("MongoClient initialized with URI: $mongoUri")
+        logger.info("MongoCollection initialized with name: $collectionName and entity class: ${entityClass.simpleName}")
+    }
 
     fun insert(entity: T) = collection.insertOne(entity)
 
@@ -30,6 +37,10 @@ abstract class GenericDao<T : Any>(
 
     fun findAll(): List<T> {
         return collection.find().toList()
+    }
+
+    fun findAllBy(predicate: Predicate<T>): List<T> {
+        return collection.find().filter { predicate.test(it) }.toList()
     }
 
     fun findAnyBy(predicate: Predicate<T>): T? {
