@@ -111,17 +111,11 @@ deploy:
   when: manual
   before_script:
     - apk update
-#    - apk add kubectl curl bash
     - apk add curl bash
     - curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
     - echo "$KUBECONFIG_CONTENT" > kubeconfig.yaml
     - export KUBECONFIG=$(pwd)/kubeconfig.yaml
-#    - kubectl config set-cluster minikube --server=https://192.168.49.2:8443/
   script:
-#    - kubectl config view
-#    - kubectl config get-contexts
-#    - kubectl cluster-info
-#    - kubectl get nodes
     - helm version
     - helm upgrade --install springboot-app ./ops/springboot-app --set image.tag=${CI_COMMIT_REF_SLUG} --debug
 

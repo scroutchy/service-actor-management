@@ -5,7 +5,7 @@ replicaCount: 1
 image:
   repository: registry.gitlab.com/cinema7590904/service-actor-management
   tag: latest
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
 
 service:
   type: ClusterIP

@@ -4,7 +4,7 @@ import com.scr.project.sam.AbstractIntegrationTest
 import com.scr.project.sam.domains.actor.dao.ActorDao
 import com.scr.project.sam.domains.actor.dao.bradPitt
 import com.scr.project.sam.domains.actor.model.entity.Actor
-import com.scr.project.sam.domains.actor.repository.ActorRepository
+import com.scr.project.sam.domains.actor.repository.SimpleActorRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -15,8 +15,8 @@ import java.time.LocalDate
 import java.util.Locale
 
 @SpringBootTest
-internal class ActorRepositoryTest(
-    @Autowired private val actorRepository: ActorRepository,
+internal class SimpleActorRepositoryImplTest(
+    @Autowired private val simpleActorRepository: SimpleActorRepository,
     @Autowired private val actorDao: ActorDao,
 ) : AbstractIntegrationTest() {
 
@@ -29,7 +29,7 @@ internal class ActorRepositoryTest(
     fun `insert should succeed`() {
         val actor = Actor("surname", "name", Locale("", "FR"), LocalDate.of(1980, 1, 1), LocalDate.of(1990, 1, 1))
         val initialCount = actorDao.count()
-        actorRepository.insert(actor)
+        simpleActorRepository.insert(actor)
             .test()
             .expectSubscription()
             .consumeNextWith {
@@ -47,7 +47,7 @@ internal class ActorRepositoryTest(
     @Test
     fun `findById should succeed when id in database`() {
         val actor = bradPitt()
-        actorRepository.findById(actor.id!!.toHexString())
+        simpleActorRepository.findById(actor.id!!.toHexString())
             .test()
             .expectSubscription()
             .consumeNextWith {
@@ -63,7 +63,7 @@ internal class ActorRepositoryTest(
 
     @Test
     fun `findById should return null when id not in database`() {
-        actorRepository.findById("dummyId")
+        simpleActorRepository.findById("dummyId")
             .test()
             .expectSubscription()
             .expectNextCount(0)

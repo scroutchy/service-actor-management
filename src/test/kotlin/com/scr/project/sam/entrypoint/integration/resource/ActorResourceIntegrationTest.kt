@@ -5,6 +5,7 @@ import com.scr.project.sam.domains.actor.dao.ActorDao
 import com.scr.project.sam.domains.actor.error.ActorExceptionHandler.ErrorResponse
 import com.scr.project.sam.entrypoint.mapper.toApiDto
 import com.scr.project.sam.entrypoint.model.api.ActorApiDto
+import com.scr.project.sam.entrypoint.model.api.ActorUpdateRequestApiDto
 import com.scr.project.sam.entrypoint.resource.ApiConstants.ACTOR_PATH
 import com.scr.project.sam.entrypoint.resource.ApiConstants.ID_PATH
 import org.assertj.core.api.Assertions.assertThat
@@ -130,5 +131,93 @@ internal class ActorResourceIntegrationTest(
             .exchange()
             .expectStatus().isNotFound
             .expectBody(ErrorResponse::class.java)
+    }
+
+    @Test
+    fun `patch should succeed and update actor when it exists in database`() {
+        val actor = actorDao.findAnyBy { it.deathDate == null }!!
+        val updateRequestDto = ActorUpdateRequestApiDto(LocalDate.now())
+        val expectedOutput = actor.copy(deathDate = updateRequestDto.deathDate).toApiDto()
+        webTestClient.mutate().baseUrl("http://localhost:$port").build()
+            .patch()
+            .uri("$ACTOR_PATH$ID_PATH", actor.id)
+            .bodyValue(updateRequestDto)
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(ActorApiDto::class.java)
+            .consumeWith {
+                val body = it.responseBody
+                assertThat(body).isNotNull
+                with(body!!) {
+                    assertThat(id).isEqualTo(expectedOutput.id)
+                    assertThat(surname).isEqualTo(expectedOutput.surname)
+                    assertThat(name).isEqualTo(expectedOutput.name)
+                    assertThat(nationality).isEqualTo(expectedOutput.nationality)
+                    assertThat(birthDate).isEqualTo(expectedOutput.birthDate)
+                    assertThat(deathDate).isEqualTo(expectedOutput.deathDate)
+                    assertThat(isAlive).isEqualTo(expectedOutput.isAlive)
+                }
+                val updatedActor = actorDao.findById(actor.id!!)
+                with(updatedActor!!) {
+                    assertThat(id).isEqualTo(actor.id)
+                    assertThat(surname).isEqualTo(actor.surname)
+                    assertThat(name).isEqualTo(actor.name)
+                    assertThat(nationality).isEqualTo(actor.nationality)
+                    assertThat(birthDate).isEqualTo(actor.birthDate)
+                    assertThat(deathDate).isEqualTo(updateRequestDto.deathDate)
+                }
+            }
+    }
+
+    @Test
+    fun `patch should return 404 when id does not exist`() {
+        val updateRequestDto = ActorUpdateRequestApiDto(LocalDate.now())
+        webTestClient.mutate().baseUrl("http://localhost:$port").build()
+            .patch()
+            .uri("$ACTOR_PATH$ID_PATH", ObjectId.get().toHexString())
+            .bodyValue(updateRequestDto)
+            .exchange()
+            .expectStatus().isNotFound
+            .expectBody(ErrorResponse::class.java)
+    }
+
+    @Test
+    fun `patch should fail when death date is in future`() {
+        val actor = actorDao.findAnyBy { it.deathDate == null }!!
+        val updateRequestDto = ActorUpdateRequestApiDto(LocalDate.now().plusDays(1))
+        actor.copy(deathDate = updateRequestDto.deathDate).toApiDto()
+        webTestClient.mutate().baseUrl("http://localhost:$port").build()
+            .patch()
+            .uri("$ACTOR_PATH$ID_PATH", actor.id)
+            .bodyValue(updateRequestDto)
+            .exchange()
+            .expectStatus().isBadRequest
+            .expectBody(Exception::class.java)
+    }
+
+    @Test
+    fun `patch should fail when actor is already dead`() {
+        val actor = actorDao.findAnyBy { it.deathDate != null }!!
+        val updateRequestDto = ActorUpdateRequestApiDto(LocalDate.now())
+        webTestClient.mutate().baseUrl("http://localhost:$port").build()
+            .patch()
+            .uri("$ACTOR_PATH$ID_PATH", actor.id)
+            .bodyValue(updateRequestDto)
+            .exchange()
+            .expectStatus().isBadRequest
+            .expectBody(Exception::class.java)
+    }
+
+    @Test
+    fun `patch should fail when death date is before birth date`() {
+        val actor = actorDao.findAnyBy { it.deathDate != null }!!
+        val updateRequestDto = ActorUpdateRequestApiDto(actor.deathDate!!.minusDays(1))
+        webTestClient.mutate().baseUrl("http://localhost:$port").build()
+            .patch()
+            .uri("$ACTOR_PATH$ID_PATH", actor.id)
+            .bodyValue(updateRequestDto)
+            .exchange()
+            .expectStatus().isBadRequest
+            .expectBody(Exception::class.java)
     }
 }
