@@ -13,6 +13,7 @@ private val jakartaValidationVersion = "3.0.2"
 private val nettyHandlerVersion = "4.1.118.Final"
 private val kMongoVersion = "4.10.0"
 private val mockkVersion = "1.12.0"
+private val netMinidevVersion = "2.5.2"
 
 java {
 	toolchain {
@@ -34,6 +35,7 @@ dependencies {
 	implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
     implementation("jakarta.validation:jakarta.validation-api:$jakartaValidationVersion")
     implementation("io.netty:netty-handler:$nettyHandlerVersion")
+    implementation("net.minidev:json-smart:$netMinidevVersion")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.boot:spring-boot-starter-webflux")
 	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
