@@ -10,7 +10,7 @@ abstract class AbstractIntegrationTest {
 
     companion object {
 
-        val mongoDBContainer = MongoDBContainer("mongo:5.0.3").apply { start() }
+        val mongoDBContainer = MongoDBContainer("mongo:6.0").apply { start() }
 
         @JvmStatic
         @DynamicPropertySource

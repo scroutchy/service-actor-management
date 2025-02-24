@@ -11,7 +11,9 @@ import com.scr.project.sam.domains.actor.repository.SimpleActorRepository
 import org.bson.types.ObjectId
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.switchIfEmpty
 
@@ -42,6 +44,13 @@ class ActorService(val simpleActorRepository: SimpleActorRepository, val actorRe
             .flatMap { actorRepository.update(updateRequest) }
             .doOnSuccess { logger.info("Update of actor with id {${updateRequest.id}} was successfull.") }
             .doOnError { logger.warn("Error when updating actor with id {${updateRequest.id}}") }
+    }
+
+    override fun findAll(includeDead: Boolean, pageable: Pageable): Flux<Actor> {
+        return actorRepository.findAll(includeDead, pageable)
+            .doOnSubscribe { logger.debug("Listing actors") }
+            .doOnComplete { logger.debug("Listing actors was successful.") }
+            .doOnError { logger.warn("Error when listing actors") }
     }
 
     private fun validateDeathDate(updateRequest: ActorUpdateRequest, actor: Actor): Actor {

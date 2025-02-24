@@ -16,12 +16,15 @@ import org.assertj.core.api.Assertions.assertThat
 import org.bson.types.ObjectId
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.data.domain.Pageable
 import reactor.core.publisher.Mono
+import reactor.kotlin.core.publisher.toFlux
 import reactor.kotlin.core.publisher.toMono
 import reactor.kotlin.test.test
 import reactor.kotlin.test.verifyError
 import java.time.LocalDate
 import java.util.Locale
+import kotlin.random.Random
 
 class ActorServiceTest {
 
@@ -136,5 +139,60 @@ class ActorServiceTest {
                 verify(inverse = true) { actorRepository.update(updateRequest) }
                 confirmVerified(simpleActorRepository, actorRepository)
             }.verifyError(OnActorAlreadyDead::class)
+    }
+
+    @Test
+    fun `findAll should list all actors`() {
+        val actors = generateListOfActors()
+        every { actorRepository.findAll(true, any()) } answers { actors.toFlux() }
+        actorService.findAll(true, Pageable.unpaged())
+            .collectList()
+            .test()
+            .expectSubscription()
+            .consumeNextWith {
+                assertThat(it).hasSize(actors.size)
+                assertThat(it).containsAll(actors)
+            }
+            .verifyComplete()
+        verify(exactly = 1) { actorRepository.findAll(true, any()) }
+        confirmVerified(actorRepository)
+    }
+
+    @Test
+    fun `findAll should list living actors only`() {
+        val livingActors = generateListOfActors().filter { it.deathDate != null }
+        every { actorRepository.findAll(false, any()) } answers { livingActors.toFlux() }
+        actorService.findAll(false, Pageable.unpaged())
+            .collectList()
+            .test()
+            .expectSubscription()
+            .consumeNextWith {
+                assertThat(it).hasSize(livingActors.size)
+                assertThat(it).containsAll(livingActors)
+            }
+            .verifyComplete()
+        verify(exactly = 1) { actorRepository.findAll(false, any()) }
+        confirmVerified(actorRepository)
+    }
+
+    @Test
+    fun `findAll should return empty list when nothing to list`() {
+        every { actorRepository.findAll(true, any()) } answers { emptyList<Actor>().toFlux() }
+        actorService.findAll(true, Pageable.unpaged())
+            .collectList()
+            .test()
+            .expectSubscription()
+            .consumeNextWith {
+                assertThat(it).isEmpty()
+            }
+            .verifyComplete()
+        verify(exactly = 1) { actorRepository.findAll(true, any()) }
+        confirmVerified(actorRepository)
+    }
+
+    private fun generateListOfActors(): List<Actor> {
+        return List(10) {
+            actor.copy(id = ObjectId.get(), deathDate = Random.nextBoolean().takeIf { it }.let { actor.deathDate })
+        }
     }
 }

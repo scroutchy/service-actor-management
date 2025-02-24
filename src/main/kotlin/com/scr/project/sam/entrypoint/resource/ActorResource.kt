@@ -14,6 +14,10 @@ import jakarta.validation.groups.Default
 import org.bson.types.ObjectId
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.beans.support.PagedListHolder.DEFAULT_PAGE_SIZE
+import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Sort.Direction.ASC
+import org.springframework.data.web.PageableDefault
 import org.springframework.http.HttpStatus.CREATED
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
@@ -23,6 +27,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Mono
 
@@ -46,7 +51,7 @@ class ActorResource(val actorService: ActorService) {
         return actorService.findById(id)
             .map { it.toApiDto() }
             .doOnSubscribe { logger.debug("Find request received") }
-            .doOnSuccess { logger.info("Finding actor request with id {${it.id}} successfully handled") }
+            .doOnSuccess { logger.debug("Finding actor request with id {${it.id}} successfully handled") }
     }
 
     @PatchMapping(ID_PATH)
@@ -56,5 +61,18 @@ class ActorResource(val actorService: ActorService) {
             .doOnSubscribe { logger.debug("Update request received") }
             .doOnSuccess { logger.info("Update request for actor with id {${it.id}} successfully handled") }
             .doOnError { logger.warn("Error at processing update request for actor with id {${id}}") }
+    }
+
+    @GetMapping
+    fun list(
+        @RequestParam includeDeadIndicator: Boolean = false,
+        @PageableDefault(size = DEFAULT_PAGE_SIZE, sort = ["surname"], direction = ASC) pageable: Pageable
+    ): RangedResponse<ActorApiDto> {
+        return actorService.findAll(includeDeadIndicator, pageable)
+            .map { it.toApiDto() }
+            .toRangedResponse(ActorApiDto::class.java, pageable)
+            .doOnSubscribe { logger.debug("List request received") }
+            .doOnSuccess { logger.debug("Listing actors request successfully handled") }
+            .doOnError { logger.warn("Error at processing list request") }
     }
 }

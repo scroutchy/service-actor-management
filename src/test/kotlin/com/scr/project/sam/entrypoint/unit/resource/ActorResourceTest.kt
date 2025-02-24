@@ -17,6 +17,8 @@ import org.assertj.core.api.Assertions.assertThat
 import org.bson.types.ObjectId
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.data.domain.Pageable
+import reactor.core.publisher.Flux
 import reactor.kotlin.core.publisher.toMono
 import reactor.kotlin.test.test
 import reactor.kotlin.test.verifyError
@@ -142,5 +144,47 @@ class ActorResourceTest {
                 confirmVerified(actorService)
             }
             .verifyError(OnActorNotFound::class)
+    }
+
+    @Test
+    fun `list should return only living actors`() {
+        val pageable = Pageable.ofSize(10)
+        val livingActor = actorRequest.toEntity().copy(id = ObjectId.get(), deathDate = null)
+        every { actorService.findAll(any(), any()) } answers { Flux.just(livingActor) }
+
+        actorResource.list(false, pageable)
+            .test()
+            .expectSubscription()
+            .consumeNextWith {
+                assertThat(it.body).hasSize(1)
+                with(it.body!!.first()) {
+                    assertThat(it).isNotNull()
+                    assertThat(id).isEqualTo(livingActor.id!!.toHexString())
+                    assertThat(surname).isEqualTo(livingActor.surname)
+                    assertThat(name).isEqualTo(livingActor.name)
+                    assertThat(nationalityCode).isNotNull
+                    assertThat(birthDate).isEqualTo(livingActor.birthDate)
+                    assertThat(deathDate).isNull()
+                    assertThat(isAlive).isTrue()
+                }
+            }
+            .verifyComplete()
+        verify(exactly = 1) { actorService.findAll(false, pageable) }
+        confirmVerified(actorService)
+    }
+
+    @Test
+    fun `list should return empty list when no actors found`() {
+        val pageable = Pageable.ofSize(10)
+        every { actorService.findAll(any(), any()) } answers { Flux.empty() }
+        actorResource.list(false, pageable)
+            .test()
+            .expectSubscription()
+            .consumeNextWith {
+                assertThat(it.body).isEmpty()
+            }
+            .verifyComplete()
+        verify(exactly = 1) { actorService.findAll(false, pageable) }
+        confirmVerified(actorService)
     }
 }
