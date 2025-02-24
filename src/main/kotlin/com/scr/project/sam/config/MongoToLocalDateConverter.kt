@@ -16,6 +16,6 @@ import java.util.Date
 class MongoToLocalDateConverter : Converter<Date, LocalDate> {
 
     override fun convert(source: Date): LocalDate {
-        return source.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
+        return source.toInstant().atZone(ZoneId.of("UTC")).toLocalDate()
     }
 }
