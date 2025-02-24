@@ -14,6 +14,7 @@ private val nettyHandlerVersion = "4.1.118.Final"
 private val kMongoVersion = "4.10.0"
 private val mockkVersion = "1.12.0"
 private val netMinidevVersion = "2.5.2"
+private val commonsCinemaVersion = "1.0.0"
 
 java {
 	toolchain {
@@ -23,6 +24,7 @@ java {
 
 repositories {
 	mavenCentral()
+    maven("https://gitlab.com/api/v4/projects/67204824/packages/maven")
 }
 
 dependencies {
@@ -36,6 +38,8 @@ dependencies {
     implementation("jakarta.validation:jakarta.validation-api:$jakartaValidationVersion")
     implementation("io.netty:netty-handler:$nettyHandlerVersion")
     implementation("net.minidev:json-smart:$netMinidevVersion")
+    implementation("com.scr.project.commons.cinema:commons-cinema:$commonsCinemaVersion")
+    testImplementation("com.scr.project.commons.cinema.test:commons-cinema-test:$commonsCinemaVersion")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.boot:spring-boot-starter-webflux")
 	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
