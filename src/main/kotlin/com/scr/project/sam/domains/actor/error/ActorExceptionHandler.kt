@@ -1,6 +1,6 @@
 package com.scr.project.sam.domains.actor.error
 
-import com.mongodb.ErrorCategory
+import com.mongodb.ErrorCategory.DUPLICATE_KEY
 import com.scr.project.sam.domains.actor.error.ActorErrorReasonCode.ACTOR_ALREADY_DEAD
 import com.scr.project.sam.domains.actor.error.ActorErrorReasonCode.ACTOR_NOT_FOUND
 import com.scr.project.sam.domains.actor.error.ActorErrorReasonCode.INCONSISTENT_DEATH_DATE
@@ -43,7 +43,7 @@ class ActorExceptionHandler {
     @ExceptionHandler(DuplicateKeyException::class)
     fun handleDuplicateKeyException(ex: DuplicateKeyException): ResponseEntity<ErrorResponse> {
         val body = ErrorResponse(
-            ErrorCategory.DUPLICATE_KEY.name,
+            DUPLICATE_KEY.name,
             "Already existing key",
             "The input request defines an actor that already exists."
         )

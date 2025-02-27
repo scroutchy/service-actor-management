@@ -2,14 +2,12 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ include "springboot-app.fullname" . }}
-  annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
   rules:
   - host: scr.g3.minikube
     http:
       paths:
-      - path: /
+      - path: /api/actors
         pathType: Prefix
         backend:
           service:

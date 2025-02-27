@@ -1,5 +1,7 @@
 package com.scr.project.sam.entrypoint.resource
 
+import com.scr.project.commons.cinema.utils.RangedResponse
+import com.scr.project.commons.cinema.utils.toRangedResponse
 import com.scr.project.sam.domains.actor.service.ActorService
 import com.scr.project.sam.entrypoint.mapper.toApiDto
 import com.scr.project.sam.entrypoint.mapper.toEntity

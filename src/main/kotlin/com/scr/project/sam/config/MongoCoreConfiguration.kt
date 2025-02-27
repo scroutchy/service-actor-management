@@ -1,5 +1,7 @@
 package com.scr.project.sam.config
 
+import com.scr.project.commons.cinema.config.LocalDateToMongoConverter
+import com.scr.project.commons.cinema.config.MongoToLocalDateConverter
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.data.mongodb.core.convert.MongoCustomConversions
