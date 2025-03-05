@@ -105,18 +105,26 @@ publish:
 
 
 deploy:
+  services: []
   tags:
-    - minikube
+    - k8s_docker
   stage: deploy
   when: manual
+  image: alpine:latest
   before_script:
     - apk update
     - apk add curl bash
-    - curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
-    - echo "$KUBECONFIG_CONTENT" > kubeconfig.yaml
+#    - apk add kubectl curl bash
+    - curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | VERIFY_CHECKSUM=false bash
+    - echo "$KUBECONFIG_CONTENT_K8SinDD" > kubeconfig.yaml
     - export KUBECONFIG=$(pwd)/kubeconfig.yaml
   script:
+#    - kubectl config view
+#    - kubectl config get-contexts
+#    - kubectl version
     - helm version
+#    - kubectl cluster-info
+#    - kubectl get nodes
     - helm upgrade --install springboot-app ./ops/springboot-app --set image.tag=${CI_COMMIT_REF_SLUG} --debug
 
 include:
