@@ -3,8 +3,9 @@ kind: Ingress
 metadata:
   name: {{ include "springboot-app.fullname" . }}
 spec:
+  ingressClassName: nginx
   rules:
-  - host: scr.g3.minikube
+  - host: {{ .Values.ingress.host }}
     http:
       paths:
       - path: /api/actors
