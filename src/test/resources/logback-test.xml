@@ -3,4 +3,5 @@
     <include resource="org/springframework/boot/logging/logback/base.xml" />
     <logger name="com.scr.project.sam" level="DEBUG"/>
     <logger name="com.scr.project.commons" level="DEBUG"/>
+    <logger name="org.springframework.security" level="DEBUG"/>
 </configuration>

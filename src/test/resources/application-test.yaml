@@ -4,3 +4,6 @@ spring:
   data:
     mongodb:
       uri: mongodb://mongodb:27017/test
+security:
+  jwt:
+    secretKey: dummySecretKeyForTestingPurposeOnly

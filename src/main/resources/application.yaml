@@ -1,0 +1,3 @@
+security:
+  jwt:
+    secretKey: ${JWT_SECRET_KEY}
