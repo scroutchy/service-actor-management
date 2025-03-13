@@ -1,7 +1,7 @@
 plugins {
 	kotlin("jvm") version "1.9.25"
 	kotlin("plugin.spring") version "1.9.25"
-	id("org.springframework.boot") version "3.4.2"
+    id("org.springframework.boot") version "3.4.3"
 	id("io.spring.dependency-management") version "1.1.7"
     id("org.sonarqube") version "6.0.1.5171"
 	id("jacoco")
@@ -14,7 +14,8 @@ private val nettyHandlerVersion = "4.1.118.Final"
 private val kMongoVersion = "4.10.0"
 private val mockkVersion = "1.12.0"
 private val netMinidevVersion = "2.5.2"
-private val commonsCinemaVersion = "1.0.0"
+private val commonsCinemaVersion = "2.0.0"
+private val jsonWebTokenVersion = "0.11.5"
 
 java {
 	toolchain {
@@ -30,18 +31,21 @@ repositories {
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
-	implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
 	implementation("org.springframework.boot:spring-boot-starter-data-mongodb-reactive")
-	implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-webflux")
     implementation("org.springframework.boot:spring-boot-starter-validation")
+    implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
 	implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
     implementation("jakarta.validation:jakarta.validation-api:$jakartaValidationVersion")
     implementation("io.netty:netty-handler:$nettyHandlerVersion")
     implementation("net.minidev:json-smart:$netMinidevVersion")
     implementation("com.scr.project.commons.cinema:commons-cinema:$commonsCinemaVersion")
+    implementation("io.jsonwebtoken:jjwt-api:$jsonWebTokenVersion")
+    runtimeOnly("io.jsonwebtoken:jjwt-impl:$jsonWebTokenVersion")
+    runtimeOnly("io.jsonwebtoken:jjwt-jackson:$jsonWebTokenVersion")
     testImplementation("com.scr.project.commons.cinema.test:commons-cinema-test:$commonsCinemaVersion")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("org.springframework.boot:spring-boot-starter-webflux")
 	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
 	testImplementation("io.projectreactor:reactor-test")
 	testImplementation("org.testcontainers:testcontainers")

@@ -9,6 +9,7 @@ import com.scr.project.sam.entrypoint.mapper.toUpdateRequest
 import com.scr.project.sam.entrypoint.model.api.ActorApiDto
 import com.scr.project.sam.entrypoint.model.api.ActorUpdateRequestApiDto
 import com.scr.project.sam.entrypoint.resource.ApiConstants.ACTOR_PATH
+import com.scr.project.sam.entrypoint.resource.ApiConstants.DEFAULT_PAGE_SIZE
 import com.scr.project.sam.entrypoint.resource.ApiConstants.ID_PATH
 import com.scr.project.sam.entrypoint.resource.validation.ValidationGroups.ActorRequest
 import jakarta.validation.Valid
@@ -16,7 +17,6 @@ import jakarta.validation.groups.Default
 import org.bson.types.ObjectId
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.beans.support.PagedListHolder.DEFAULT_PAGE_SIZE
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort.Direction.ASC
 import org.springframework.data.web.PageableDefault
