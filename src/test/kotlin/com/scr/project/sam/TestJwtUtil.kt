@@ -1,5 +1,6 @@
 package com.scr.project.sam
 
+import com.scr.project.sam.domains.security.config.SecurityConfiguration.Companion.ROLE_WRITE
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.Keys
 import org.springframework.beans.factory.annotation.Value
@@ -9,15 +10,12 @@ import java.util.Date
 @Component
 class TestJwtUtil(@Value("\${security.jwt.secretKey}") private val secretKey: String) {
 
-    final val standardToken: String
+    final val standardToken: String = generateMockToken()
+    final val writeToken: String = generateMockToken(listOf(ROLE_WRITE))
 
-    init {
-        standardToken = generateMockToken()
-    }
-
-    final fun generateMockToken(roles: List<String> = listOf("USER")): String {
+    final fun generateMockToken(roles: List<String> = listOf()): String {
         val claims = Jwts.claims().setSubject("test-user")
-//        claims["roles"] = roles // Optional: Include roles if your security config uses them
+        claims["roles"] = roles.map { "ROLE_$it" }.toList()
         return Jwts.builder()
             .setClaims(claims)
             .setIssuedAt(Date())
