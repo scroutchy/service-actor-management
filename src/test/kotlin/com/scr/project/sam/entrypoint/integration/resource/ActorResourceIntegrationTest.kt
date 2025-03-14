@@ -57,7 +57,7 @@ internal class ActorResourceIntegrationTest(
         webTestClient.mutate().baseUrl("http://localhost:$port").build()
             .post()
             .uri(ACTOR_PATH)
-            .header(AUTHORIZATION, "Bearer ${testJwtUtil.standardToken}")
+            .header(AUTHORIZATION, "Bearer ${testJwtUtil.writeToken}")
             .bodyValue(actorRequest)
             .exchange()
             .expectStatus().isCreated
@@ -101,7 +101,7 @@ internal class ActorResourceIntegrationTest(
         webTestClient.mutate().baseUrl("http://localhost:$port").build()
             .post()
             .uri(ACTOR_PATH)
-            .header(AUTHORIZATION, "Bearer ${testJwtUtil.standardToken}")
+            .header(AUTHORIZATION, "Bearer ${testJwtUtil.writeToken}")
             .bodyValue(actorRequest)
             .exchange()
             .expectStatus().isEqualTo(CONFLICT)
@@ -124,6 +124,25 @@ internal class ActorResourceIntegrationTest(
             .bodyValue(actorRequest)
             .exchange()
             .expectStatus().isUnauthorized
+            .expectBody(ErrorResponse::class.java)
+    }
+
+    @Test
+    fun `create should return 403 when authorization fails because no matching role`() {
+        val actorRequest = ActorApiDto(
+            "surname",
+            "name",
+            "FR",
+            LocalDate.of(1980, 1, 1),
+            LocalDate.of(1990, 1, 1)
+        )
+        webTestClient.mutate().baseUrl("http://localhost:$port").build()
+            .post()
+            .uri(ACTOR_PATH)
+            .header(AUTHORIZATION, "Bearer ${testJwtUtil.standardToken}")
+            .bodyValue(actorRequest)
+            .exchange()
+            .expectStatus().isForbidden
             .expectBody(ErrorResponse::class.java)
     }
 
@@ -182,7 +201,7 @@ internal class ActorResourceIntegrationTest(
         webTestClient.mutate().baseUrl("http://localhost:$port").build()
             .patch()
             .uri("$ACTOR_PATH$ID_PATH", actor.id)
-            .header(AUTHORIZATION, "Bearer ${testJwtUtil.standardToken}")
+            .header(AUTHORIZATION, "Bearer ${testJwtUtil.writeToken}")
             .bodyValue(updateRequestDto)
             .exchange()
             .expectStatus().isOk
@@ -217,7 +236,7 @@ internal class ActorResourceIntegrationTest(
         webTestClient.mutate().baseUrl("http://localhost:$port").build()
             .patch()
             .uri("$ACTOR_PATH$ID_PATH", ObjectId.get().toHexString())
-            .header(AUTHORIZATION, "Bearer ${testJwtUtil.standardToken}")
+            .header(AUTHORIZATION, "Bearer ${testJwtUtil.writeToken}")
             .bodyValue(updateRequestDto)
             .exchange()
             .expectStatus().isNotFound
@@ -232,7 +251,7 @@ internal class ActorResourceIntegrationTest(
         webTestClient.mutate().baseUrl("http://localhost:$port").build()
             .patch()
             .uri("$ACTOR_PATH$ID_PATH", actor.id)
-            .header(AUTHORIZATION, "Bearer ${testJwtUtil.standardToken}")
+            .header(AUTHORIZATION, "Bearer ${testJwtUtil.writeToken}")
             .bodyValue(updateRequestDto)
             .exchange()
             .expectStatus().isBadRequest
@@ -246,7 +265,7 @@ internal class ActorResourceIntegrationTest(
         webTestClient.mutate().baseUrl("http://localhost:$port").build()
             .patch()
             .uri("$ACTOR_PATH$ID_PATH", actor.id)
-            .header(AUTHORIZATION, "Bearer ${testJwtUtil.standardToken}")
+            .header(AUTHORIZATION, "Bearer ${testJwtUtil.writeToken}")
             .bodyValue(updateRequestDto)
             .exchange()
             .expectStatus().isBadRequest
@@ -260,11 +279,39 @@ internal class ActorResourceIntegrationTest(
         webTestClient.mutate().baseUrl("http://localhost:$port").build()
             .patch()
             .uri("$ACTOR_PATH$ID_PATH", actor.id)
-            .header(AUTHORIZATION, "Bearer ${testJwtUtil.standardToken}")
+            .header(AUTHORIZATION, "Bearer ${testJwtUtil.writeToken}")
             .bodyValue(updateRequestDto)
             .exchange()
             .expectStatus().isBadRequest
             .expectBody(Exception::class.java)
+    }
+
+    @Test
+    fun `patch should fail and return 401 when authentication fails`() {
+        val actor = actorDao.findAnyBy { it.deathDate == null }!!
+        val updateRequestDto = ActorUpdateRequestApiDto(LocalDate.now())
+        webTestClient.mutate().baseUrl("http://localhost:$port").build()
+            .patch()
+            .uri("$ACTOR_PATH$ID_PATH", actor.id)
+            .header(AUTHORIZATION, "Bearer dummyToken")
+            .bodyValue(updateRequestDto)
+            .exchange()
+            .expectStatus().isUnauthorized
+            .expectBody(ErrorResponse::class.java)
+    }
+
+    @Test
+    fun `patch should fail and return 403 when authorization fails`() {
+        val actor = actorDao.findAnyBy { it.deathDate == null }!!
+        val updateRequestDto = ActorUpdateRequestApiDto(LocalDate.now())
+        webTestClient.mutate().baseUrl("http://localhost:$port").build()
+            .patch()
+            .uri("$ACTOR_PATH$ID_PATH", actor.id)
+            .header(AUTHORIZATION, "Bearer ${testJwtUtil.standardToken}")
+            .bodyValue(updateRequestDto)
+            .exchange()
+            .expectStatus().isForbidden
+            .expectBody(ErrorResponse::class.java)
     }
 
     @Test
