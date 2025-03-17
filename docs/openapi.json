@@ -10,12 +10,20 @@
       "description": "Generated server url"
     }
   ],
+  "tags": [
+    {
+      "name": "Actors",
+      "description": "Operations on actors"
+    }
+  ],
   "paths": {
     "/api/actors": {
       "get": {
         "tags": [
-          "actor-resource"
+          "Actors"
         ],
+        "summary": "List actors",
+        "description": "List all actors. A filter can be applied to list only the living ones.",
         "operationId": "list",
         "parameters": [
           {
@@ -27,15 +35,74 @@
             }
           },
           {
-            "name": "pageable",
+            "name": "page",
             "in": "query",
-            "required": true,
+            "description": "Zero-based page index (0..N)",
+            "required": false,
             "schema": {
-              "$ref": "#/components/schemas/Pageable"
+              "type": "integer",
+              "default": 0,
+              "minimum": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "The size of the page to be returned",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10,
+              "minimum": 1
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "description": "Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "default": [
+                "surname,ASC"
+              ],
+              "items": {
+                "type": "string"
+              }
             }
           }
         ],
         "responses": {
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
           "200": {
             "description": "OK",
             "content": {
@@ -53,8 +120,10 @@
       },
       "post": {
         "tags": [
-          "actor-resource"
+          "Actors"
         ],
+        "summary": "Creation of a new actor",
+        "description": "Creation of a new actor with the given data",
         "operationId": "create",
         "requestBody": {
           "content": {
@@ -67,8 +136,38 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK",
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Created",
             "content": {
               "*/*": {
                 "schema": {
@@ -83,20 +182,54 @@
     "/api/actors/{id}": {
       "get": {
         "tags": [
-          "actor-resource"
+          "Actors"
         ],
+        "summary": "Retrieve an actor",
+        "description": "Retrieve an actor by its technical id",
         "operationId": "find",
         "parameters": [
           {
             "name": "id",
             "in": "path",
+            "description": "Technical id of the actor to be retrieved",
             "required": true,
             "schema": {
-              "$ref": "#/components/schemas/ObjectId"
+              "type": "string",
+              "format": "objectId"
             }
           }
         ],
         "responses": {
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
           "200": {
             "description": "OK",
             "content": {
@@ -111,16 +244,20 @@
       },
       "patch": {
         "tags": [
-          "actor-resource"
+          "Actors"
         ],
+        "summary": "Update actor\u0027s death date",
+        "description": "Update the date of death of an actor identified by its technical id",
         "operationId": "patch",
         "parameters": [
           {
             "name": "id",
             "in": "path",
+            "description": "Technical id of the actor to be updated",
             "required": true,
             "schema": {
-              "$ref": "#/components/schemas/ObjectId"
+              "type": "string",
+              "format": "objectId"
             }
           }
         ],
@@ -135,6 +272,36 @@
           "required": true
         },
         "responses": {
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
           "200": {
             "description": "OK",
             "content": {
@@ -151,6 +318,20 @@
   },
   "components": {
     "schemas": {
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "errorCode": {
+            "type": "string"
+          },
+          "errorReason": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
       "ActorApiDto": {
         "type": "object",
         "properties": {
@@ -187,46 +368,12 @@
           "surname"
         ]
       },
-      "ObjectId": {
-        "type": "object",
-        "properties": {
-          "timestamp": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "date": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
       "ActorUpdateRequestApiDto": {
         "type": "object",
         "properties": {
           "deathDate": {
             "type": "string",
             "format": "date"
-          }
-        }
-      },
-      "Pageable": {
-        "type": "object",
-        "properties": {
-          "page": {
-            "type": "integer",
-            "format": "int32",
-            "minimum": 0
-          },
-          "size": {
-            "type": "integer",
-            "format": "int32",
-            "minimum": 1
-          },
-          "sort": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
           }
         }
       }

@@ -117,10 +117,14 @@ sonar {
 openApi {
     outputDir.set(file("docs"))
     outputFileName.set("openapi.json")
+    customBootRun {
+        environment.set(mapOf("JWT_SECRET_KEY" to "dummySecretKeyForTestingPurposeOnly"))
+    }
 }
 
 tasks {
     forkedSpringBootRun {
         doNotTrackState("See https://github.com/springdoc/springdoc-openapi-gradle-plugin/issues/102")
+        args = listOf("--spring.profiles.active=test").toMutableList()
     }
 }
