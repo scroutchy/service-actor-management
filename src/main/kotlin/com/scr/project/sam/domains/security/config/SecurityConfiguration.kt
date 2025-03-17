@@ -29,7 +29,8 @@ class SecurityConfiguration(@Value("\${security.jwt.secretKey}") private val sec
         return http
             .csrf { it.disable() }
             .authorizeExchange {
-                it.pathMatchers(POST).hasRole(ROLE_WRITE)
+                it.pathMatchers("/v3/api-docs/**").permitAll()
+                    .pathMatchers(POST).hasRole(ROLE_WRITE)
                     .pathMatchers(PATCH).hasRole(ROLE_WRITE)
                     .anyExchange().authenticated()
             }

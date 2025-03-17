@@ -1,3 +1,7 @@
+spring:
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/service-actor-management
 security:
   jwt:
-    secretKey: ${JWT_SECRET_KEY}
+    secretKey: ${JWT_SECRET_KEY:dummySecretKeyForTestingPurposeOnly}
