@@ -5,6 +5,7 @@ plugins {
 	id("io.spring.dependency-management") version "1.1.7"
     id("org.sonarqube") version "6.0.1.5171"
 	id("jacoco")
+    id("org.springdoc.openapi-gradle-plugin") version "1.9.0"
 }
 
 group = "com.scr.project"
@@ -42,6 +43,7 @@ dependencies {
     implementation("net.minidev:json-smart:$netMinidevVersion")
     implementation("com.scr.project.commons.cinema:commons-cinema:$commonsCinemaVersion")
     implementation("io.jsonwebtoken:jjwt-api:$jsonWebTokenVersion")
+    implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.8.5")
     runtimeOnly("io.jsonwebtoken:jjwt-impl:$jsonWebTokenVersion")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:$jsonWebTokenVersion")
     testImplementation("com.scr.project.commons.cinema.test:commons-cinema-test:$commonsCinemaVersion")
@@ -109,5 +111,20 @@ sonar {
     properties {
         property("sonar.projectKey", "cinema7590904_service-actor-management")
         property("sonar.organization", "cinema7590904")
+    }
+}
+
+openApi {
+    outputDir.set(file("docs"))
+    outputFileName.set("openapi.json")
+    customBootRun {
+        environment.set(mapOf("JWT_SECRET_KEY" to "dummySecretKeyForTestingPurposeOnly"))
+    }
+}
+
+tasks {
+    forkedSpringBootRun {
+        doNotTrackState("See https://github.com/springdoc/springdoc-openapi-gradle-plugin/issues/102")
+        args = listOf("--spring.profiles.active=test").toMutableList()
     }
 }
