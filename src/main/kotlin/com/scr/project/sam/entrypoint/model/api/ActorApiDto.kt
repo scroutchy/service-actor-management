@@ -29,4 +29,4 @@ data class ActorApiDto(
     val nationality: String? = null,
     @field:Null(groups = [ActorRequest::class])
     var id: String? = null
-)
+) : DTO
