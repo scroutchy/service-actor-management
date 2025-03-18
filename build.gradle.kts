@@ -14,7 +14,7 @@ private val nettyHandlerVersion = "4.1.118.Final"
 private val kMongoVersion = "4.10.0"
 private val mockkVersion = "1.12.0"
 private val netMinidevVersion = "2.5.2"
-private val commonsCinemaVersion = "2.1.0"
+private val commonsCinemaVersion = "2.1.1"
 private val jsonWebTokenVersion = "0.11.5"
 
 java {
