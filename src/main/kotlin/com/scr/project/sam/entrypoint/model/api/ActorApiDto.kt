@@ -1,5 +1,6 @@
 package com.scr.project.sam.entrypoint.model.api
 
+import com.scr.project.commons.cinema.model.api.DTO
 import com.scr.project.sam.entrypoint.resource.validation.IsValidDeathDate
 import com.scr.project.sam.entrypoint.resource.validation.ValidationGroups.ActorRequest
 import jakarta.validation.constraints.NotBlank
