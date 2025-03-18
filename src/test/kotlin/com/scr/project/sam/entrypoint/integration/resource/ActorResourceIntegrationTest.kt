@@ -15,6 +15,7 @@ import org.bson.types.ObjectId
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
@@ -23,6 +24,13 @@ import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.HttpHeaders.CONTENT_RANGE
 import org.springframework.http.HttpStatus.CONFLICT
 import org.springframework.http.HttpStatus.PARTIAL_CONTENT
+import org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessResponse
+import org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint
+import org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath
+import org.springframework.restdocs.payload.PayloadDocumentation.responseFields
+import org.springframework.restdocs.request.RequestDocumentation.parameterWithName
+import org.springframework.restdocs.request.RequestDocumentation.pathParameters
+import org.springframework.restdocs.webtestclient.WebTestClientRestDocumentation.document
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.test.web.reactive.server.WebTestClient.ListBodySpec
 import java.time.LocalDate
@@ -31,9 +39,11 @@ import kotlin.random.Random
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @AutoConfigureWebTestClient
+@AutoConfigureRestDocs
 internal class ActorResourceIntegrationTest(
     @Autowired private val webTestClient: WebTestClient,
     @Autowired private val actorDao: ActorDao,
+//    @Autowired private val restDocumentation: RestDocumentationContextProvider,
 ) : AbstractIntegrationTest() {
 
     @LocalServerPort
@@ -146,7 +156,6 @@ internal class ActorResourceIntegrationTest(
             .expectBody(ErrorResponse::class.java)
     }
 
-
     @Test
     fun `find should succeed and returns an actor response when id exists`() {
         val actorResponse = actorDao.findAny()!!.toApiDto()
@@ -157,14 +166,34 @@ internal class ActorResourceIntegrationTest(
             .exchange()
             .expectStatus().isOk
             .expectBody(ActorApiDto::class.java)
-            .consumeWith {
-                val body = it.responseBody
+            .consumeWith(
+                document(
+                    "actors-find-by-id",
+                    preprocessResponse(prettyPrint()),
+                    pathParameters(
+                        parameterWithName("id").description("Unique identifier of the actor")
+                    ),
+                    responseFields(
+                        fieldWithPath("id").description("The unique identifier of the actor"),
+                        fieldWithPath("surname").description("Surname of the actor"),
+                        fieldWithPath("name").description("Name of the actor"),
+                        fieldWithPath("nationality").description("Nationality of the actor"),
+                        fieldWithPath("nationalityCode").description("Country code for the actor's nationality"),
+                        fieldWithPath("birthDate").description("Birth date of the actor"),
+                        fieldWithPath("deathDate").description("Death date of the actor (if applicable)"),
+                        fieldWithPath("isAlive").description("Indicator if the actor is alive")
+                    )
+                )
+            )
+            .consumeWith { result ->
+                val body = result.responseBody as ActorApiDto
                 assertThat(body).isNotNull
-                with(body!!) {
+                with(body) {
                     assertThat(id).isEqualTo(actorResponse.id)
                     assertThat(surname).isEqualTo(actorResponse.surname)
                     assertThat(name).isEqualTo(actorResponse.name)
                     assertThat(nationality).isEqualTo(actorResponse.nationality)
+                    assertThat(nationalityCode).isEqualTo(actorResponse.nationalityCode)
                     assertThat(birthDate).isEqualTo(actorResponse.birthDate)
                     assertThat(deathDate).isEqualTo(actorResponse.deathDate)
                     assertThat(isAlive).isEqualTo(actorResponse.isAlive)

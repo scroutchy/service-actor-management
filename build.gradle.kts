@@ -55,6 +55,8 @@ dependencies {
     testImplementation("org.litote.kmongo:kmongo:$kMongoVersion")
 	testImplementation("org.testcontainers:mongodb")
     testImplementation("io.mockk:mockk:$mockkVersion")
+    testImplementation("org.springframework.restdocs:spring-restdocs-webtestclient")
+    testImplementation("org.springframework.restdocs:spring-restdocs-asciidoctor")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
