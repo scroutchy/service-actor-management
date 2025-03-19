@@ -4,6 +4,7 @@ import io.jsonwebtoken.security.Keys
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.http.HttpMethod.OPTIONS
 import org.springframework.http.HttpMethod.PATCH
 import org.springframework.http.HttpMethod.POST
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity
@@ -31,6 +32,7 @@ class SecurityConfiguration(@Value("\${security.jwt.secretKey}") private val sec
             .authorizeExchange {
                 it.pathMatchers(POST).hasRole(ROLE_WRITE)
                     .pathMatchers(PATCH).hasRole(ROLE_WRITE)
+                    .pathMatchers(OPTIONS).permitAll()
                     .anyExchange().authenticated()
             }
             .oauth2ResourceServer { it.jwt {} }
