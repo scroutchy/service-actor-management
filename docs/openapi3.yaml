@@ -1,0 +1,456 @@
+openapi: 3.0.1
+info:
+  title: service-actor-management
+  description: This application aims to manage the actors and their main characteristics
+  version: 1.0.0
+servers:
+- url: http://localhost
+tags: []
+paths:
+  api/actors:
+    get:
+      tags:
+      - Actors
+      summary: List actors
+      description: List actors
+      operationId: list-
+      parameters:
+      - name: includeDeadIndicator
+        in: query
+        description: Indicator to include dead actors in the list
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: "200"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/api-actors-358461362"
+              examples:
+                list-empty:
+                  value: "[ ]"
+                list-full:
+                  value: "[ {\r\n  \"surname\" : \"Pitt\",\r\n  \"name\" : \"AYaKj\"\
+                    ,\r\n  \"nationalityCode\" : \"US\",\r\n  \"birthDate\" : \"1963-12-18\"\
+                    ,\r\n  \"deathDate\" : \"1963-12-28\",\r\n  \"isAlive\" : false,\r\
+                    \n  \"nationality\" : \"États-Unis\",\r\n  \"id\" : \"67dacaa208ca2e6c8f31a612\"\
+                    \r\n}, {\r\n  \"surname\" : \"Pitt\",\r\n  \"name\" : \"GnFnW\"\
+                    ,\r\n  \"nationalityCode\" : \"US\",\r\n  \"birthDate\" : \"1963-12-18\"\
+                    ,\r\n  \"isAlive\" : true,\r\n  \"nationality\" : \"États-Unis\"\
+                    ,\r\n  \"id\" : \"67dacaa208ca2e6c8f31a610\"\r\n}, {\r\n  \"surname\"\
+                    \ : \"Pitt\",\r\n  \"name\" : \"TJMkl\",\r\n  \"nationalityCode\"\
+                    \ : \"US\",\r\n  \"birthDate\" : \"1963-12-18\",\r\n  \"deathDate\"\
+                    \ : \"1963-12-28\",\r\n  \"isAlive\" : false,\r\n  \"nationality\"\
+                    \ : \"États-Unis\",\r\n  \"id\" : \"67dacaa208ca2e6c8f31a611\"\
+                    \r\n}, {\r\n  \"surname\" : \"Pitt\",\r\n  \"name\" : \"fiyTx\"\
+                    ,\r\n  \"nationalityCode\" : \"US\",\r\n  \"birthDate\" : \"1963-12-18\"\
+                    ,\r\n  \"isAlive\" : true,\r\n  \"nationality\" : \"États-Unis\"\
+                    ,\r\n  \"id\" : \"67dacaa208ca2e6c8f31a60e\"\r\n}, {\r\n  \"surname\"\
+                    \ : \"Pitt\",\r\n  \"name\" : \"ihGJj\",\r\n  \"nationalityCode\"\
+                    \ : \"US\",\r\n  \"birthDate\" : \"1963-12-18\",\r\n  \"isAlive\"\
+                    \ : true,\r\n  \"nationality\" : \"États-Unis\",\r\n  \"id\" :\
+                    \ \"67dacaa208ca2e6c8f31a60f\"\r\n} ]"
+        "206":
+          description: "206"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/api-actors-358461362"
+              examples:
+                list-partial:
+                  value: "[ {\r\n  \"surname\" : \"Pitt\",\r\n  \"name\" : \"CBzev\"\
+                    ,\r\n  \"nationalityCode\" : \"US\",\r\n  \"birthDate\" : \"1963-12-18\"\
+                    ,\r\n  \"isAlive\" : true,\r\n  \"nationality\" : \"États-Unis\"\
+                    ,\r\n  \"id\" : \"67dacaa108ca2e6c8f31a602\"\r\n}, {\r\n  \"surname\"\
+                    \ : \"Pitt\",\r\n  \"name\" : \"CZiBL\",\r\n  \"nationalityCode\"\
+                    \ : \"US\",\r\n  \"birthDate\" : \"1963-12-18\",\r\n  \"isAlive\"\
+                    \ : true,\r\n  \"nationality\" : \"États-Unis\",\r\n  \"id\" :\
+                    \ \"67dacaa108ca2e6c8f31a5ff\"\r\n}, {\r\n  \"surname\" : \"Pitt\"\
+                    ,\r\n  \"name\" : \"FQsQd\",\r\n  \"nationalityCode\" : \"US\"\
+                    ,\r\n  \"birthDate\" : \"1963-12-18\",\r\n  \"isAlive\" : true,\r\
+                    \n  \"nationality\" : \"États-Unis\",\r\n  \"id\" : \"67dacaa108ca2e6c8f31a5f8\"\
+                    \r\n}, {\r\n  \"surname\" : \"Pitt\",\r\n  \"name\" : \"HRsin\"\
+                    ,\r\n  \"nationalityCode\" : \"US\",\r\n  \"birthDate\" : \"1963-12-18\"\
+                    ,\r\n  \"isAlive\" : true,\r\n  \"nationality\" : \"États-Unis\"\
+                    ,\r\n  \"id\" : \"67dacaa108ca2e6c8f31a5f7\"\r\n}, {\r\n  \"surname\"\
+                    \ : \"Pitt\",\r\n  \"name\" : \"IOejb\",\r\n  \"nationalityCode\"\
+                    \ : \"US\",\r\n  \"birthDate\" : \"1963-12-18\",\r\n  \"deathDate\"\
+                    \ : \"1963-12-28\",\r\n  \"isAlive\" : false,\r\n  \"nationality\"\
+                    \ : \"États-Unis\",\r\n  \"id\" : \"67dacaa108ca2e6c8f31a601\"\
+                    \r\n}, {\r\n  \"surname\" : \"Pitt\",\r\n  \"name\" : \"TGpxq\"\
+                    ,\r\n  \"nationalityCode\" : \"US\",\r\n  \"birthDate\" : \"1963-12-18\"\
+                    ,\r\n  \"deathDate\" : \"1963-12-28\",\r\n  \"isAlive\" : false,\r\
+                    \n  \"nationality\" : \"États-Unis\",\r\n  \"id\" : \"67dacaa108ca2e6c8f31a5fc\"\
+                    \r\n}, {\r\n  \"surname\" : \"Pitt\",\r\n  \"name\" : \"UrXbu\"\
+                    ,\r\n  \"nationalityCode\" : \"US\",\r\n  \"birthDate\" : \"1963-12-18\"\
+                    ,\r\n  \"isAlive\" : true,\r\n  \"nationality\" : \"États-Unis\"\
+                    ,\r\n  \"id\" : \"67dacaa108ca2e6c8f31a5fb\"\r\n}, {\r\n  \"surname\"\
+                    \ : \"Pitt\",\r\n  \"name\" : \"dhMal\",\r\n  \"nationalityCode\"\
+                    \ : \"US\",\r\n  \"birthDate\" : \"1963-12-18\",\r\n  \"deathDate\"\
+                    \ : \"1963-12-28\",\r\n  \"isAlive\" : false,\r\n  \"nationality\"\
+                    \ : \"États-Unis\",\r\n  \"id\" : \"67dacaa108ca2e6c8f31a5fd\"\
+                    \r\n}, {\r\n  \"surname\" : \"Pitt\",\r\n  \"name\" : \"emnAp\"\
+                    ,\r\n  \"nationalityCode\" : \"US\",\r\n  \"birthDate\" : \"1963-12-18\"\
+                    ,\r\n  \"deathDate\" : \"1963-12-28\",\r\n  \"isAlive\" : false,\r\
+                    \n  \"nationality\" : \"États-Unis\",\r\n  \"id\" : \"67dacaa108ca2e6c8f31a5f6\"\
+                    \r\n}, {\r\n  \"surname\" : \"Pitt\",\r\n  \"name\" : \"kUcjg\"\
+                    ,\r\n  \"nationalityCode\" : \"US\",\r\n  \"birthDate\" : \"1963-12-18\"\
+                    ,\r\n  \"isAlive\" : true,\r\n  \"nationality\" : \"États-Unis\"\
+                    ,\r\n  \"id\" : \"67dacaa108ca2e6c8f31a600\"\r\n} ]"
+      security:
+      - bearerAuthJWT: []
+    post:
+      tags:
+      - Actors
+      summary: Create an actor
+      description: Create an actor by entering its basic information
+      operationId: actors-createcreate-conflictcreate-forbiddencreate-not-authorized
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/api-actors-1609101952"
+            examples:
+              actors-create:
+                value: "{\"surname\":\"surname\",\"name\":\"name\",\"nationalityCode\"\
+                  :\"FR\",\"birthDate\":\"1980-01-01\",\"deathDate\":\"1990-01-01\"\
+                  }"
+              create-conflict:
+                value: "{\"surname\":\"Pitt\",\"name\":\"Brad\",\"nationalityCode\"\
+                  :\"FR\",\"birthDate\":\"1980-01-01\",\"deathDate\":\"1990-01-01\"\
+                  }"
+              create-forbidden:
+                value: "{\"surname\":\"surname\",\"name\":\"name\",\"nationalityCode\"\
+                  :\"FR\",\"birthDate\":\"1980-01-01\",\"deathDate\":\"1990-01-01\"\
+                  }"
+              create-not-authorized:
+                value: "{\"surname\":\"surname\",\"name\":\"name\",\"nationalityCode\"\
+                  :\"FR\",\"birthDate\":\"1980-01-01\",\"deathDate\":\"1990-01-01\"\
+                  }"
+      responses:
+        "201":
+          description: "201"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/api-actors1912485252"
+              examples:
+                actors-create:
+                  value: "{\r\n  \"surname\" : \"surname\",\r\n  \"name\" : \"name\"\
+                    ,\r\n  \"nationalityCode\" : \"FR\",\r\n  \"birthDate\" : \"1980-01-01\"\
+                    ,\r\n  \"deathDate\" : \"1990-01-01\",\r\n  \"isAlive\" : false,\r\
+                    \n  \"nationality\" : \"France\",\r\n  \"id\" : \"67dacaa108ca2e6c8f31a606\"\
+                    \r\n}"
+        "409":
+          description: "409"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/api-actors-id486549215"
+              examples:
+                create-conflict:
+                  value: "{\r\n  \"errorCode\" : \"DUPLICATE_KEY\",\r\n  \"errorReason\"\
+                    \ : \"Already existing key\",\r\n  \"message\" : \"The input request\
+                    \ defines an actor that already exists.\"\r\n}"
+        "403":
+          description: "403"
+        "401":
+          description: "401"
+      security:
+      - bearerAuthJWT: []
+  api/actors/{id}:
+    get:
+      tags:
+      - Actors
+      summary: Find actor by id
+      description: Retrieve the information of an actor identified by its unique id
+      operationId: actors-find-by-idfind-not-authorizedfind-not-found
+      parameters:
+      - name: id
+        in: path
+        description: Unique identifier of the actor
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: "200"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/api-actors1912485252"
+              examples:
+                actors-find-by-id:
+                  value: "{\r\n  \"surname\" : \"Pitt\",\r\n  \"name\" : \"Brad\"\
+                    ,\r\n  \"nationalityCode\" : \"US\",\r\n  \"birthDate\" : \"1963-12-18\"\
+                    ,\r\n  \"isAlive\" : true,\r\n  \"nationality\" : \"États-Unis\"\
+                    ,\r\n  \"id\" : \"679bf64bf44d492fd46eec9f\"\r\n}"
+        "401":
+          description: "401"
+        "404":
+          description: "404"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/api-actors-id-217701221"
+              examples:
+                find-not-found:
+                  value: "{\r\n  \"errorCode\" : \"ACTOR_NOT_FOUND\",\r\n  \"errorReason\"\
+                    \ : \"Actor is not registered\",\r\n  \"message\" : \"The actor\
+                    \ with id 67dacaa108ca2e6c8f31a5f5 was not found\"\r\n}"
+      security:
+      - bearerAuthJWT: []
+    patch:
+      tags:
+      - Actors
+      summary: Update an actor (death)
+      description: Set a death date for an actor
+      operationId: actor-patchpatch-already-deadpatch-death-before-birthpatch-forbiddenpatch-not-authorizedpatch-not-foundpatch-wrong-date
+      parameters:
+      - name: id
+        in: path
+        description: Unique identifier of the actor
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/api-actors-id-240244911"
+            examples:
+              actor-patch:
+                value: "{\"deathDate\":\"2025-03-19\"}"
+              patch-already-dead:
+                value: "{\"deathDate\":\"2025-03-19\"}"
+              patch-death-before-birth:
+                value: "{\"deathDate\":\"1963-12-17\"}"
+              patch-forbidden:
+                value: "{\"deathDate\":\"2025-03-19\"}"
+              patch-not-authorized:
+                value: "{\"deathDate\":\"2025-03-19\"}"
+              patch-not-found:
+                value: "{\"deathDate\":\"2025-03-19\"}"
+              patch-wrong-date:
+                value: "{\"deathDate\":\"2025-03-20\"}"
+      responses:
+        "200":
+          description: "200"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/api-actors-id1524361558"
+              examples:
+                actor-patch:
+                  value: "{\r\n  \"surname\" : \"Pitt\",\r\n  \"name\" : \"Brad\"\
+                    ,\r\n  \"nationalityCode\" : \"US\",\r\n  \"birthDate\" : \"1963-12-18\"\
+                    ,\r\n  \"deathDate\" : \"2025-03-19\",\r\n  \"isAlive\" : false,\r\
+                    \n  \"nationality\" : \"États-Unis\",\r\n  \"id\" : \"679bf64bf44d492fd46eec9f\"\
+                    \r\n}"
+        "400":
+          description: "400"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/api-actors-id486549215"
+              examples:
+                patch-already-dead:
+                  value: "{\r\n  \"errorCode\" : \"ACTOR_ALREADY_DEAD\",\r\n  \"errorReason\"\
+                    \ : \"The actor is already dead\",\r\n  \"message\" : \"Actor\
+                    \ with id 679bf64bf44d492fd46eeca0 is already dead.\"\r\n}"
+                patch-death-before-birth:
+                  value: "{\r\n  \"errorCode\" : \"INCONSISTENT_DEATH_DATE\",\r\n\
+                    \  \"errorReason\" : \"Death date cannot be prior to birth date\"\
+                    ,\r\n  \"message\" : \"Death date 1963-12-17 is prior to birth\
+                    \ date of actor 679bf64bf44d492fd46eec9f.\"\r\n}"
+                patch-wrong-date:
+                  value: "{\r\n  \"timestamp\" : \"2025-03-19T13:46:09.020+00:00\"\
+                    ,\r\n  \"path\" : \"/api/actors/679bf64bf44d492fd46eec9f\",\r\n\
+                    \  \"status\" : 400,\r\n  \"error\" : \"Bad Request\",\r\n  \"\
+                    requestId\" : \"1d647e2a\"\r\n}"
+        "403":
+          description: "403"
+        "401":
+          description: "401"
+        "404":
+          description: "404"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/api-actors-id486549215"
+              examples:
+                patch-not-found:
+                  value: "{\r\n  \"errorCode\" : \"ACTOR_NOT_FOUND\",\r\n  \"errorReason\"\
+                    \ : \"Actor is not registered\",\r\n  \"message\" : \"The actor\
+                    \ with id 67dacaa008ca2e6c8f31a5f4 was not found\"\r\n}"
+      security:
+      - bearerAuthJWT: []
+components:
+  schemas:
+    api-actors-1609101952:
+      required:
+      - birthDate
+      - name
+      - nationalityCode
+      - surname
+      type: object
+      properties:
+        nationalityCode:
+          type: string
+          description: Country code for the actor's nationality
+        surname:
+          type: string
+          description: Surname of the actor
+        deathDate:
+          type: string
+          description: Death date of the actor (if applicable)
+          nullable: true
+        name:
+          type: string
+          description: Name of the actor
+        birthDate:
+          type: string
+          description: Birth date of the actor
+    api-actors1912485252:
+      required:
+      - birthDate
+      - id
+      - isAlive
+      - name
+      - nationality
+      - nationalityCode
+      - surname
+      type: object
+      properties:
+        isAlive:
+          type: boolean
+          description: Indicator if the actor is alive
+        nationalityCode:
+          type: string
+          description: Country code for the actor's nationality
+        nationality:
+          type: string
+          description: Nationality of the actor
+        surname:
+          type: string
+          description: Surname of the actor
+        deathDate:
+          type: string
+          description: Death date of the actor (if applicable)
+          nullable: true
+        name:
+          type: string
+          description: Name of the actor
+        id:
+          type: string
+          description: The unique identifier of the actor
+        birthDate:
+          type: string
+          description: Birth date of the actor
+    api-actors-358461362:
+      type: array
+      items:
+        required:
+        - birthDate
+        - id
+        - isAlive
+        - name
+        - nationality
+        - nationalityCode
+        - surname
+        type: object
+        properties:
+          isAlive:
+            type: boolean
+            description: Is the actor alive
+          nationalityCode:
+            type: string
+            description: Country code for the actor's nationality
+          nationality:
+            type: string
+            description: Nationality of the actor
+          surname:
+            type: string
+            description: Surname of the actor
+          deathDate:
+            type: string
+            description: Death date of the actor
+            nullable: true
+          name:
+            type: string
+            description: Name of the actor
+          id:
+            type: string
+            description: Id of the actor
+          birthDate:
+            type: string
+            description: Birth date of the actor
+    api-actors-id1524361558:
+      required:
+      - birthDate
+      - deathDate
+      - id
+      - isAlive
+      - name
+      - nationality
+      - nationalityCode
+      - surname
+      type: object
+      properties:
+        isAlive:
+          type: boolean
+          description: Is the actor alive
+        nationalityCode:
+          type: string
+          description: Country code for the actor's nationality
+        nationality:
+          type: string
+          description: Nationality of the actor
+        surname:
+          type: string
+          description: Surname of the actor
+        deathDate:
+          type: string
+          description: Death date of the actor
+        name:
+          type: string
+          description: Name of the actor
+        id:
+          type: string
+          description: Id of the actor
+        birthDate:
+          type: string
+          description: Birth date of the actor
+    api-actors-id-217701221:
+      required:
+      - errorCode
+      - errorReason
+      - message
+      type: object
+      properties:
+        errorReason:
+          type: string
+          description: Error reason
+        errorCode:
+          type: string
+          description: Error code
+        message:
+          type: string
+          description: Error message
+    api-actors-id-240244911:
+      required:
+      - deathDate
+      type: object
+      properties:
+        deathDate:
+          type: string
+          description: Date of death of the actor
+    api-actors-id486549215:
+      type: object
+  securitySchemes:
+    bearerAuthJWT:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
