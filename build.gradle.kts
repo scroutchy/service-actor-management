@@ -1,7 +1,7 @@
 plugins {
 	kotlin("jvm") version "1.9.25"
 	kotlin("plugin.spring") version "1.9.25"
-    id("org.springframework.boot") version "3.4.3"
+    id("org.springframework.boot") version "3.4.4"
 	id("io.spring.dependency-management") version "1.1.7"
     id("org.sonarqube") version "6.0.1.5171"
 	id("jacoco")
@@ -11,11 +11,9 @@ plugins {
 group = "com.scr.project"
 version = "0.0.1-SNAPSHOT"
 private val jakartaValidationVersion = "3.0.2"
-private val nettyHandlerVersion = "4.1.118.Final"
 private val kMongoVersion = "4.10.0"
 private val mockkVersion = "1.12.0"
-private val netMinidevVersion = "2.5.2"
-private val commonsCinemaVersion = "2.1.1"
+private val commonsCinemaVersion = "2.1.2"
 private val jsonWebTokenVersion = "0.11.5"
 
 java {
@@ -39,8 +37,6 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
 	implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
     implementation("jakarta.validation:jakarta.validation-api:$jakartaValidationVersion")
-    implementation("io.netty:netty-handler:$nettyHandlerVersion")
-    implementation("net.minidev:json-smart:$netMinidevVersion")
     implementation("com.scr.project.commons.cinema:commons-cinema:$commonsCinemaVersion")
     implementation("io.jsonwebtoken:jjwt-api:$jsonWebTokenVersion")
     runtimeOnly("io.jsonwebtoken:jjwt-impl:$jsonWebTokenVersion")
