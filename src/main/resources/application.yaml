@@ -1,3 +1,6 @@
-security:
-  jwt:
-    secretKey: ${JWT_SECRET_KEY}
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://keycloak.keycloak.svc.cluster.local/realms/cinema

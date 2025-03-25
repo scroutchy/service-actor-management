@@ -14,7 +14,7 @@ private val jakartaValidationVersion = "3.0.2"
 private val kMongoVersion = "4.10.0"
 private val mockkVersion = "1.12.0"
 private val commonsCinemaVersion = "2.1.2"
-private val jsonWebTokenVersion = "0.11.5"
+private val testcontainersKeycloackVersion = "3.6.0"
 
 java {
 	toolchain {
@@ -38,9 +38,6 @@ dependencies {
 	implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
     implementation("jakarta.validation:jakarta.validation-api:$jakartaValidationVersion")
     implementation("com.scr.project.commons.cinema:commons-cinema:$commonsCinemaVersion")
-    implementation("io.jsonwebtoken:jjwt-api:$jsonWebTokenVersion")
-    runtimeOnly("io.jsonwebtoken:jjwt-impl:$jsonWebTokenVersion")
-    runtimeOnly("io.jsonwebtoken:jjwt-jackson:$jsonWebTokenVersion")
     testImplementation("com.scr.project.commons.cinema.test:commons-cinema-test:$commonsCinemaVersion")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
@@ -49,6 +46,7 @@ dependencies {
 	testImplementation("org.testcontainers:junit-jupiter")
     testImplementation("org.litote.kmongo:kmongo:$kMongoVersion")
 	testImplementation("org.testcontainers:mongodb")
+    testImplementation("com.github.dasniko:testcontainers-keycloak:$testcontainersKeycloackVersion")
     testImplementation("io.mockk:mockk:$mockkVersion")
     testImplementation("org.springframework.restdocs:spring-restdocs-webtestclient")
     testImplementation("org.springframework.restdocs:spring-restdocs-asciidoctor")
