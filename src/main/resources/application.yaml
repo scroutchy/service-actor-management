@@ -3,4 +3,4 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:8082/realms/cinema
+          issuer-uri: http://10.96.210.119:80/realms/cinema
