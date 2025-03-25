@@ -9,6 +9,11 @@ import org.springframework.http.HttpMethod.POST
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity
 import org.springframework.security.config.web.server.ServerHttpSecurity
 import org.springframework.security.core.authority.SimpleGrantedAuthority
+import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator
+import org.springframework.security.oauth2.core.OAuth2TokenValidator
+import org.springframework.security.oauth2.jwt.Jwt
+import org.springframework.security.oauth2.jwt.NimbusReactiveJwtDecoder
+import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder
 import org.springframework.security.oauth2.server.resource.authentication.ReactiveJwtAuthenticationConverter
 import org.springframework.security.web.server.SecurityWebFilterChain
 import reactor.core.publisher.Flux
@@ -34,6 +39,20 @@ class SecurityConfiguration(@Value("\${spring.security.oauth2.resourceserver.jwt
             }
             .oauth2ResourceServer { it.jwt {} }
             .build()
+    }
+
+    @Bean
+    fun reactiveJwtDecoder(): ReactiveJwtDecoder {
+        // Récupérez l'URI du JWKS (nécessaire pour la validation de la signature)
+        val jwkSetUri = "$issuerUri/protocol/openid-connect/certs"
+        val jwtDecoder = NimbusReactiveJwtDecoder.withJwkSetUri(jwkSetUri).build()
+        // Créez un validateur qui ne contient PAS la validation de l'issuer
+        val withoutIssuer: OAuth2TokenValidator<Jwt> = DelegatingOAuth2TokenValidator(
+            // Vous pouvez ajouter d'autres validateurs ici si nécessaire (par exemple, pour l'audience)
+        )
+
+        jwtDecoder.setJwtValidator(withoutIssuer)
+        return jwtDecoder
     }
 
     @Bean
