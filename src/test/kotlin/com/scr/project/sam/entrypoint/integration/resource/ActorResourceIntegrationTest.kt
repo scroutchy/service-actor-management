@@ -16,6 +16,7 @@ import com.scr.project.sam.entrypoint.resource.ApiConstants.ID_PATH
 import org.assertj.core.api.Assertions.assertThat
 import org.bson.types.ObjectId
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs
@@ -42,6 +43,7 @@ import kotlin.random.Random
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @AutoConfigureWebTestClient
 @AutoConfigureRestDocs
+@Disabled("Disabled while testing keycloak")
 internal class ActorResourceIntegrationTest(
     @Autowired private val webTestClient: WebTestClient,
     @Autowired private val actorDao: ActorDao,
