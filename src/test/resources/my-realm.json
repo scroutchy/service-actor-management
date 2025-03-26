@@ -1,6 +1,14 @@
 {
   "realm": "my-realm",
   "enabled": true,
+  "roles": {
+    "realm": [
+      {
+        "name": "cinema_write",
+        "description": "Role for writing cinema data"
+      }
+    ]
+  },
   "clients": [
     {
       "clientId": "my-client",
@@ -26,6 +34,24 @@
         }
       ],
       "requiredActions": []
+    },
+    {
+      "username": "writeuser",
+      "enabled": true,
+      "email": "writeuser@test.com",
+      "emailVerified": true,
+      "firstName": "Write",
+      "lastName": "User",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "writepass"
+        }
+      ],
+      "requiredActions": [],
+      "realmRoles": [
+        "cinema_write"
+      ]
     }
   ]
 }

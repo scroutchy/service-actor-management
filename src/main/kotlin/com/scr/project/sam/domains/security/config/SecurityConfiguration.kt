@@ -42,7 +42,7 @@ class SecurityConfiguration(@Value("\${spring.security.oauth2.resourceserver.jwt
             setJwtGrantedAuthoritiesConverter { jwt ->
                 val realmAccess = jwt.getClaimAsMap("realm_access")
                 val roles = realmAccess?.get("roles") as? List<String> ?: emptyList()
-                Flux.fromIterable(roles.map { SimpleGrantedAuthority(it) })
+                Flux.fromIterable(roles.map { SimpleGrantedAuthority("ROLE_$it") })
             }
         }
     }
