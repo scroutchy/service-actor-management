@@ -19,7 +19,7 @@ class SecurityConfiguration(@Value("\${spring.security.oauth2.resourceserver.jwt
 
     companion object {
 
-        const val ROLE_WRITE = "WRITE"
+        const val ROLE_WRITE = "cinema_write"
     }
 
     @Bean
@@ -40,7 +40,8 @@ class SecurityConfiguration(@Value("\${spring.security.oauth2.resourceserver.jwt
     fun jwtAuthenticationConverter(): ReactiveJwtAuthenticationConverter {
         return ReactiveJwtAuthenticationConverter().apply {
             setJwtGrantedAuthoritiesConverter { jwt ->
-                val roles = jwt.getClaimAsStringList("roles") ?: emptyList()
+                val realmAccess = jwt.getClaimAsMap("realm_access")
+                val roles = realmAccess?.get("roles") as? List<String> ?: emptyList()
                 Flux.fromIterable(roles.map { SimpleGrantedAuthority(it) })
             }
         }
