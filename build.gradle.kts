@@ -49,6 +49,7 @@ dependencies {
 	testImplementation("org.testcontainers:junit-jupiter")
     testImplementation("org.litote.kmongo:kmongo:$kMongoVersion")
 	testImplementation("org.testcontainers:mongodb")
+    testImplementation("com.github.dasniko:testcontainers-keycloak:3.6.0")
     testImplementation("io.mockk:mockk:$mockkVersion")
     testImplementation("org.springframework.restdocs:spring-restdocs-webtestclient")
     testImplementation("org.springframework.restdocs:spring-restdocs-asciidoctor")

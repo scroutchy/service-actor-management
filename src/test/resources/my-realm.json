@@ -1,0 +1,31 @@
+{
+  "realm": "my-realm",
+  "enabled": true,
+  "clients": [
+    {
+      "clientId": "my-client",
+      "redirectUris": [
+        "/*"
+      ],
+      "publicClient": true,
+      "directAccessGrantsEnabled": true
+    }
+  ],
+  "users": [
+    {
+      "username": "testuser",
+      "enabled": true,
+      "email": "testuser@test.com",
+      "emailVerified": true,
+      "firstName": "Test",
+      "lastName": "User",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "testpass"
+        }
+      ],
+      "requiredActions": []
+    }
+  ]
+}
