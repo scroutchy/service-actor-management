@@ -3,6 +3,7 @@ package com.scr.project.sam.domains.actor.service
 import com.scr.project.sam.domains.actor.error.ActorErrors.OnActorAlreadyDead
 import com.scr.project.sam.domains.actor.error.ActorErrors.OnActorNotFound
 import com.scr.project.sam.domains.actor.error.ActorErrors.OnInconsistentDeathDate
+import com.scr.project.sam.domains.actor.messaging.v1.RewardedMessagingV1
 import com.scr.project.sam.domains.actor.model.business.ActorUpdateRequest
 import com.scr.project.sam.domains.actor.model.entity.Actor
 import com.scr.project.sam.domains.actor.ports.ActorPort
@@ -18,12 +19,17 @@ import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.switchIfEmpty
 
 @Service
-class ActorService(val simpleActorRepository: SimpleActorRepository, val actorRepository: ActorRepositoryImpl) : ActorPort {
+class ActorService(
+    val simpleActorRepository: SimpleActorRepository,
+    val actorRepository: ActorRepositoryImpl,
+    val actorMessagingV1: RewardedMessagingV1
+) : ActorPort {
 
     private val logger: Logger = LoggerFactory.getLogger(ActorService::class.java)
 
     override fun create(actor: Actor): Mono<Actor> {
         return simpleActorRepository.insert(actor)
+            .flatMap { actorMessagingV1.notify(it) }
             .doOnSubscribe { logger.debug("Creating actor") }
             .doOnSuccess { logger.info("Creation of actor with id ${it.id} was successfull.") }
             .doOnError { logger.error("Error when creating actor") }

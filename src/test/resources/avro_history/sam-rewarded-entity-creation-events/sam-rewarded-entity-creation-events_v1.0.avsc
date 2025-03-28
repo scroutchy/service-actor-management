@@ -1,0 +1,24 @@
+{
+  "type": "record",
+  "name": "RewardedKafkaDto",
+  "namespace": "com.scr.project.sam",
+  "fields": [
+    {
+      "name": "id",
+      "type": "string",
+      "doc": "This is the unique identifier of the rewarded entity."
+    },
+    {
+      "name": "type",
+      "type": {
+        "type": "enum",
+        "name": "RewardedEntityTypeKafkaDto",
+        "symbols": [
+          "ACTOR",
+          "MOVIE"
+        ]
+      },
+      "doc": "This is the type of the rewarded entity."
+    }
+  ]
+}

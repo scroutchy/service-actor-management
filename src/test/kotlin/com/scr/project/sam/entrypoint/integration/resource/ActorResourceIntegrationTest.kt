@@ -4,6 +4,9 @@ import com.epages.restdocs.apispec.ResourceDocumentation.resource
 import com.epages.restdocs.apispec.ResourceSnippetParameters
 import com.epages.restdocs.apispec.WebTestClientRestDocumentationWrapper
 import com.scr.project.sam.AbstractIntegrationTest
+import com.scr.project.sam.RewardedEntityTypeKafkaDto.ACTOR
+import com.scr.project.sam.RewardedKafkaTestConsumer
+import com.scr.project.sam.TestKafkaConfig
 import com.scr.project.sam.domains.actor.dao.ActorDao
 import com.scr.project.sam.domains.actor.dao.bradPitt
 import com.scr.project.sam.domains.actor.error.ActorExceptionHandler.ErrorResponse
@@ -23,6 +26,7 @@ import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWeb
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
 import org.springframework.boot.test.web.server.LocalServerPort
+import org.springframework.context.annotation.Import
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.HttpHeaders.CONTENT_RANGE
 import org.springframework.http.HttpStatus.CONFLICT
@@ -42,10 +46,12 @@ import kotlin.random.Random
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @AutoConfigureWebTestClient
 @AutoConfigureRestDocs
+@Import(TestKafkaConfig::class)
 internal class ActorResourceIntegrationTest(
     @Autowired private val webTestClient: WebTestClient,
     @Autowired private val actorDao: ActorDao,
     @Autowired private val restDocumentation: RestDocumentationContextProvider,
+    @Autowired private val kafkaRewardedConsumer: RewardedKafkaTestConsumer,
 ) : AbstractIntegrationTest() {
 
     @LocalServerPort
@@ -54,6 +60,7 @@ internal class ActorResourceIntegrationTest(
     @BeforeEach
     fun setUp() {
         actorDao.initTestData()
+        kafkaRewardedConsumer.clearTopic()
     }
 
     private companion object {
@@ -135,6 +142,12 @@ internal class ActorResourceIntegrationTest(
                     assertThat(nationality).isEqualTo(Locale("", body.nationalityCode))
                     assertThat(birthDate).isEqualTo(body.birthDate)
                     assertThat(deathDate).isEqualTo(body.deathDate)
+                }
+                val messages = kafkaRewardedConsumer.poll()
+                assertThat(messages).hasSize(1)
+                with(messages.first()) {
+                    assertThat(id).isEqualTo(body.id)
+                    assertThat(type).isEqualTo(ACTOR)
                 }
             }
     }

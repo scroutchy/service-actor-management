@@ -1,0 +1,9 @@
+{
+  "name": "RewardedEntityTypeKafkaDto",
+  "namespace": "com.scr.project.sam",
+  "type": "enum",
+  "symbols": [
+    "ACTOR",
+    "MOVIE"
+  ]
+}
