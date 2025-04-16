@@ -29,6 +29,15 @@ spec:
                 secretKeyRef:
                   name: mongodb-secret
                   key: mongodbUri
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: {{ .Values.kafka.bootstrapServers }}
+            - name: SCHEMA_REGISTRY_URL
+              value: {{ .Values.kafka.schemaRegistryUrl }}
+            - name: KAFKA_SASL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: sasl-password-secret
+                  key: saslPassword
           resources:
             requests:
               ephemeral-storage: {{ .Values.resources.requests.ephemeralStorage }}

@@ -3,6 +3,7 @@ package com.scr.project.sam.domains.actor.service
 import com.scr.project.sam.domains.actor.error.ActorErrors.OnActorAlreadyDead
 import com.scr.project.sam.domains.actor.error.ActorErrors.OnActorNotFound
 import com.scr.project.sam.domains.actor.error.ActorErrors.OnInconsistentDeathDate
+import com.scr.project.sam.domains.actor.messaging.v1.RewardedMessagingV1
 import com.scr.project.sam.domains.actor.model.business.ActorUpdateRequest
 import com.scr.project.sam.domains.actor.model.entity.Actor
 import com.scr.project.sam.domains.actor.repository.ActorRepositoryImpl
@@ -34,12 +35,14 @@ class ActorServiceTest {
     private val actorToUpdate = actor.copy(deathDate = null)
     private val simpleActorRepository = mockk<SimpleActorRepository>()
     private val actorRepository = mockk<ActorRepositoryImpl>()
-    private val actorService = ActorService(simpleActorRepository, actorRepository)
+    private val rewardedMessagingV1 = mockk<RewardedMessagingV1>()
+    private val actorService = ActorService(simpleActorRepository, actorRepository, rewardedMessagingV1)
 
     @BeforeEach
     internal fun setUp() {
-        clearMocks(simpleActorRepository, actorRepository)
+        clearMocks(simpleActorRepository, actorRepository, rewardedMessagingV1)
         every { simpleActorRepository.insert(actorWithoutId) } answers { actorWithoutId.copy(id = ObjectId.get()).toMono() }
+        every { rewardedMessagingV1.notify(any<Actor>()) } answers { firstArg<Actor>().toMono() }
     }
 
     @Test
@@ -56,7 +59,8 @@ class ActorServiceTest {
                 assertThat(it.deathDate).isEqualTo(actorWithoutId.deathDate)
             }.verifyComplete()
         verify(exactly = 1) { simpleActorRepository.insert(actorWithoutId) }
-        confirmVerified(simpleActorRepository)
+        verify(exactly = 1) { rewardedMessagingV1.notify(match { it == actorWithoutId.copy(id = it.id) && it.id != null }) }
+        confirmVerified(simpleActorRepository, rewardedMessagingV1)
     }
 
     @Test
@@ -108,7 +112,8 @@ class ActorServiceTest {
             .verifyComplete()
         verify(exactly = 1) { simpleActorRepository.findById(actor.id!!.toHexString()) }
         verify(exactly = 1) { actorRepository.update(updateRequest) }
-        confirmVerified(simpleActorRepository, actorRepository)
+        verify(inverse = true) { rewardedMessagingV1.notify(any()) }
+        confirmVerified(simpleActorRepository, actorRepository, rewardedMessagingV1)
     }
 
     @Test
