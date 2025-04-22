@@ -14,6 +14,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.switchIfEmpty
@@ -27,6 +28,7 @@ class ActorService(
 
     private val logger: Logger = LoggerFactory.getLogger(ActorService::class.java)
 
+    @Transactional
     override fun create(actor: Actor): Mono<Actor> {
         return simpleActorRepository.insert(actor)
             .flatMap { actorMessagingV1.notify(it) }

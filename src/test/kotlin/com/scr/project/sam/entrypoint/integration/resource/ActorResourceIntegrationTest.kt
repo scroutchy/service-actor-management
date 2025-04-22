@@ -143,6 +143,7 @@ internal class ActorResourceIntegrationTest(
                     assertThat(birthDate).isEqualTo(body.birthDate)
                     assertThat(deathDate).isEqualTo(body.deathDate)
                 }
+                Thread.sleep(1000)
                 val messages = kafkaRewardedConsumer.poll()
                 assertThat(messages).hasSize(1)
                 with(messages.first()) {

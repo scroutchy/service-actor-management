@@ -9,4 +9,7 @@ internal class DaoTestConfiguration {
 
     @Bean
     fun actorDao(@Value("\${spring.data.mongodb.uri}") mongoUri: String) = ActorDao(mongoUri)
+
+    @Bean
+    fun outboxDao(@Value("\${spring.data.mongodb.uri}") mongoUri: String) = OutboxDao(mongoUri)
 }
