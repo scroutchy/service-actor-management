@@ -78,7 +78,8 @@ class ActorServiceTest {
                 assertThat(it.deathDate).isEqualTo(actor.deathDate)
             }.verifyComplete()
         verify(exactly = 1) { simpleActorRepository.findById(actor.id!!.toHexString()) }
-        confirmVerified(simpleActorRepository)
+        verify(inverse = true) { rewardedMessagingV1.notify(any()) }
+        confirmVerified(simpleActorRepository, rewardedMessagingV1)
     }
 
     @Test
