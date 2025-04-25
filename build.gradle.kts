@@ -7,6 +7,7 @@ plugins {
 	id("jacoco")
     id("com.epages.restdocs-api-spec") version "0.19.4"
     id("com.github.davidmc24.gradle.plugin.avro") version "1.9.1"
+    `maven-publish`
 }
 
 group = "com.scr.project"
@@ -133,6 +134,30 @@ openapi3 {
     description = "This application aims to manage the actors and their main characteristics"
     format = "yaml"
 }
+// Task pour packager les fichiers .avsc INPUT dans un JAR
+//val avroSchemaJar by tasks.registering(Jar::class) {
+//    archiveBaseName.set("service-actor-management-avro-schemas") // Nom de l'artefact des schémas
+//    archiveClassifier.set("avro") // Classifieur
+//    // Prendre les fichiers depuis les répertoires SOURCES .avsc configurés pour le plugin Avro
+//    from(sourceSets.main.get().avro.srcDirs)
+//    // Inclure uniquement les fichiers .avsc
+//    include("**/*.avsc")
+//}
+publishing {
+    repositories {
+        maven {
+            maven {
+                url = uri("${System.getenv("CI_API_V4_URL")}/projects/${System.getenv("CI_PROJECT_ID")}/packages/maven")
+                credentials(HttpHeaderCredentials::class.java) {
+                    name = "Job-Token"
+                    value = System.getenv("CI_JOB_TOKEN")
+                }
+                authentication { create("header", HttpHeaderAuthentication::class.java) }
+            }
+        }
+    }
+}
+
 
 afterEvaluate {
     tasks.findByName("openapi3")?.finalizedBy(tasks.register<Copy>("copyApiSpecToDocs") {
