@@ -134,16 +134,31 @@ openapi3 {
     description = "This application aims to manage the actors and their main characteristics"
     format = "yaml"
 }
+
 // Task pour packager les fichiers .avsc INPUT dans un JAR
-//val avroSchemaJar by tasks.registering(Jar::class) {
-//    archiveBaseName.set("service-actor-management-avro-schemas") // Nom de l'artefact des schémas
-//    archiveClassifier.set("avro") // Classifieur
-//    // Prendre les fichiers depuis les répertoires SOURCES .avsc configurés pour le plugin Avro
-//    from(sourceSets.main.get().avro.srcDirs)
-//    // Inclure uniquement les fichiers .avsc
-//    include("**/*.avsc")
-//}
+val avroSchemaJar by tasks.registering(Jar::class) {
+    archiveBaseName.set("service-actor-management-avro-schemas") // Nom de l'artefact des schémas
+    archiveClassifier.set("avro") // Classifieur
+    // Prendre les fichiers depuis les répertoires SOURCES .avsc configurés pour le plugin Avro
+    from(sourceSets.main.get())//.avro.srcDirs)
+    // Inclure uniquement les fichiers .avsc
+    include("**/*.avsc")
+}
+
 publishing {
+    publications {
+        create<MavenPublication>("avroSchemas") {
+            // Publie l'artefact généré par le task 'avroSchemaJar'
+            artifact(tasks.getByName<Jar>("avroSchemaJar")) {
+                // Le classifieur 'avro' est déjà défini dans le task avroSchemaJar
+            }
+            // Définir les coordonnées de l'artefact des schémas dans le dépôt
+            groupId = group.toString() // Utilisez le même groupe que le projet principal si pertinent
+            artifactId = "sam-avro-schemas" // Le nom spécifique de l'artefact des schémas
+            version = version.toString() // Utilisez la même version que le projet principal
+        }
+    }
+
     repositories {
         maven {
             maven {
