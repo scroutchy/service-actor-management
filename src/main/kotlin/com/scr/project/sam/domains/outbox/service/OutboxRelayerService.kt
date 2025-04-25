@@ -37,9 +37,9 @@ class OutboxRelayerService(
                     }
             }
             .subscribe(
-                { logger.debug("Outbox event processing step completed.") }, // onNext est appelé pour chaque Mono<Void> complété par processSingleOutboxEvent
+                { logger.debug("Outbox event processing step completed.") },
                 { e -> logger.warn("Error during outbox processing loop: {}", e.message, e) },
-                { logger.debug("Outbox relayer scan completed.") } // onComplete quand findAll() est terminé et tous les documents traités séquentiellement
+                { logger.debug("Outbox relayer scan completed.") }
             )
     }
 
@@ -60,7 +60,7 @@ class OutboxRelayerService(
             .thenReturn(Unit)
     }
 
-    private fun createSenderRecord(outbox: Outbox): Mono<SenderRecord<String?, RewardedKafkaDto?, ObjectId?>?> {
+    private fun createSenderRecord(outbox: Outbox): Mono<SenderRecord<String, RewardedKafkaDto, ObjectId>> {
         return ProducerRecord(outbox.topic, outbox.aggregateId, objectMapper.readValue(outbox.payload, RewardedKafkaDto::class.java))
             .toMono()
             .map { SenderRecord.create(it, outbox.id) }
