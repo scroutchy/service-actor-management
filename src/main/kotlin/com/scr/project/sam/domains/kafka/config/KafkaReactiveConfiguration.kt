@@ -1,6 +1,5 @@
 package com.scr.project.sam.domains.kafka.config
 
-import com.scr.project.srm.RewardedKafkaDto
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import reactor.kafka.sender.KafkaSender
@@ -12,6 +11,6 @@ class KafkaReactiveConfiguration(
 ) {
 
     @Bean
-    fun kafkaSender(): KafkaSender<String, RewardedKafkaDto> = KafkaSender.create(SenderOptions.create(kafkaAvroProducerProperties))
+    fun kafkaSender(): KafkaSender<String, Any> = KafkaSender.create(SenderOptions.create(kafkaAvroProducerProperties))
 
 }
