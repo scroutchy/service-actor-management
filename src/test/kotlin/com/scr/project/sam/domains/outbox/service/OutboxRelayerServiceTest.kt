@@ -25,11 +25,11 @@ import reactor.kotlin.core.publisher.toFlux
 class OutboxRelayerServiceTest {
 
     private val outboxRepository = mockk<OutboxRepository>()
-    private val kafkaSender = mockk<KafkaSender<String, RewardedKafkaDto>>()
+    private val kafkaSender = mockk<KafkaSender<String, Any>>()
     private val objectMapper = ObjectMapper()
     private val outboxRelayerService = OutboxRelayerService(outboxRepository, kafkaSender, objectMapper)
     private val outbox = Outbox(RewardedKafkaDto::class.java.name, "id", "{ \"id\": \"value\", \"type\": \"ACTOR\" }", "topic")
-    private val senderRecordSlot = slot<Mono<SenderRecord<String, RewardedKafkaDto, ObjectId>>>()
+    private val senderRecordSlot = slot<Mono<SenderRecord<String, Any, ObjectId>>>()
 
     @BeforeEach
     fun setUp() {
@@ -64,7 +64,7 @@ class OutboxRelayerServiceTest {
         every { outboxRepository.delete(outbox) } answers { Mono.empty() }
         outboxRelayerService.processOutbox()
         verify(exactly = 1) { outboxRepository.findAll() }
-        verify(exactly = 1) { kafkaSender.send(any<Mono<SenderRecord<String, RewardedKafkaDto, ObjectId>>>()) }
+        verify(exactly = 1) { kafkaSender.send(any<Mono<SenderRecord<String, Any, ObjectId>>>()) }
         verify(exactly = 1) { outboxRepository.delete(outbox) }
         confirmVerified(outboxRepository, kafkaSender)
     }
@@ -72,12 +72,12 @@ class OutboxRelayerServiceTest {
     @Test
     fun `processOutbox should handle kafka exception and not delete outbox record`() {
         every { outboxRepository.findAll() } answers { listOf(outbox).toFlux() }
-        every { kafkaSender.send(any<Mono<SenderRecord<String, RewardedKafkaDto, ObjectId>>>()) } answers {
+        every { kafkaSender.send(any<Mono<SenderRecord<String, Any, ObjectId>>>()) } answers {
             Flux.error(RuntimeException("Kafka send failed"))
         }
         outboxRelayerService.processOutbox()
         verify(exactly = 1) { outboxRepository.findAll() }
-        verify(exactly = 1) { kafkaSender.send(any<Mono<SenderRecord<String, RewardedKafkaDto, ObjectId>>>()) }
+        verify(exactly = 1) { kafkaSender.send(any<Mono<SenderRecord<String, Any, ObjectId>>>()) }
         verify(inverse = true) { outboxRepository.delete(outbox) }
         confirmVerified(outboxRepository, kafkaSender)
     }
@@ -88,20 +88,20 @@ class OutboxRelayerServiceTest {
         every { outboxRepository.delete(outbox) } answers { Mono.error(RuntimeException("Delete failed")) }
         outboxRelayerService.processOutbox()
         verify(exactly = 1) { outboxRepository.findAll() }
-        verify(exactly = 1) { kafkaSender.send(any<Mono<SenderRecord<String, RewardedKafkaDto, ObjectId>>>()) }
+        verify(exactly = 1) { kafkaSender.send(any<Mono<SenderRecord<String, Any, ObjectId>>>()) }
         verify(exactly = 1) { outboxRepository.delete(outbox) }
         confirmVerified(outboxRepository, kafkaSender)
     }
 
     @Test
-    fun `processOutbox should succeed when more than one document in outbox and filter out outbox events that are not RewardedKafkaDto`() {
+    fun `processOutbox should succeed when more than one document in outbox and reject unknown types`() {
         val outbox1 = Outbox(RewardedKafkaDto::class.java.name, "id", "{ \"id\": \"value1\", \"type\": \"MOVIE\" }", "topic")
-        val outbox2 = Outbox("dummy", "id", "{ \"id\": \"value1\", \"type\": \"MOVIE\" }", "topic")
-        every { outboxRepository.findAll() } answers { listOf(outbox, outbox1).toFlux() }
+        val outbox2 = Outbox("dummy", "id", "{ \"id\": \"value1\", \"surname\": \"surname\", \"name\": \"name\" }", "topic")
+        every { outboxRepository.findAll() } answers { listOf(outbox, outbox1, outbox2).toFlux() }
         every { outboxRepository.delete(any<Outbox>()) } answers { Mono.empty() }
         outboxRelayerService.processOutbox()
         verify(exactly = 1) { outboxRepository.findAll() }
-        verify(exactly = 2) { kafkaSender.send(any<Mono<SenderRecord<String, RewardedKafkaDto, ObjectId>>>()) }
+        verify(exactly = 2) { kafkaSender.send(any<Mono<SenderRecord<String, Any, ObjectId>>>()) }
         verify(exactly = 1) { outboxRepository.delete(outbox) }
         verify(exactly = 1) { outboxRepository.delete(outbox1) }
         verify(inverse = true) { outboxRepository.delete(outbox2) }

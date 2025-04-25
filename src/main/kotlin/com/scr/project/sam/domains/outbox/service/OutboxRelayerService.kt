@@ -1,7 +1,6 @@
 package com.scr.project.sam.domains.outbox.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.scr.project.sam.RewardedKafkaDto
 import com.scr.project.sam.domains.outbox.model.entity.Outbox
 import com.scr.project.sam.domains.outbox.repository.OutboxRepository
 import org.apache.kafka.clients.producer.ProducerRecord
@@ -18,7 +17,7 @@ import reactor.kotlin.core.publisher.toMono
 @Service
 class OutboxRelayerService(
     private val outboxRepository: OutboxRepository,
-    private val kafkaSender: KafkaSender<String, RewardedKafkaDto>,
+    private val kafkaSender: KafkaSender<String, Any>,
     private val objectMapper: ObjectMapper
 ) {
 
@@ -27,7 +26,6 @@ class OutboxRelayerService(
     @Scheduled(fixedDelay = 1000, initialDelayString = "\${outbox.initialDelay:0}")
     fun processOutbox() {
         outboxRepository.findAll()
-            .filter { it.aggregateType == RewardedKafkaDto::class.java.name }
             .flatMapSequential {
                 logger.debug("Processing outbox event: {}", it.id)
                 processSingleOutboxEvent(it)
@@ -60,8 +58,8 @@ class OutboxRelayerService(
             .thenReturn(Unit)
     }
 
-    private fun createSenderRecord(outbox: Outbox): Mono<SenderRecord<String, RewardedKafkaDto, ObjectId>> {
-        return ProducerRecord(outbox.topic, outbox.aggregateId, objectMapper.readValue(outbox.payload, RewardedKafkaDto::class.java))
+    private fun createSenderRecord(outbox: Outbox): Mono<SenderRecord<String, Any, ObjectId>> {
+        return ProducerRecord(outbox.topic, outbox.aggregateId, objectMapper.readValue(outbox.payload, Class.forName(outbox.aggregateType)))
             .toMono()
             .map { SenderRecord.create(it, outbox.id) }
     }
