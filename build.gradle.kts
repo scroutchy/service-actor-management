@@ -60,7 +60,7 @@ fun getGitTag(): String {
                 ?.replace("[^a-z0-9]+".toRegex(), "-")
                 ?.trim('-')
                 ?.replace("-+".toRegex(), "-")
-                ?.let { "$it-SNAPSHOT" }
+//                ?.let { "$it-SNAPSHOT" }
         } ?: "0.0.1-SNAPSHOT"
     } catch (e: Exception) {
         println("Error getting git information: ${e.message}")

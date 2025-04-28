@@ -96,7 +96,7 @@ publish:
   script:
     - gradle publish
     - ls -la build/libs/
-    - docker build -t $REGISTRY/$IMAGE_NAME:$IMAGE_TAG .
+    - docker build --build-arg APP_VERSION=${CI_COMMIT_REF_SLUG} -t $REGISTRY/$IMAGE_NAME:$IMAGE_TAG .
     - docker push $REGISTRY/$IMAGE_NAME:$IMAGE_TAG
   #  dependencies:
   #    - build
