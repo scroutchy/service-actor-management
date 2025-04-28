@@ -27,8 +27,8 @@ variables:
 
 stages:
   - build
-  #  - test
-  #  - sonar
+  - test
+  - sonar
   - publish
   - deploy
 
@@ -48,44 +48,44 @@ build:
       - build/libs/service-actor-management-${CI_COMMIT_REF_SLUG}.jar
     expire_in: 1 day
 
-#test:
-#  stage: test
-#  script: gradle check
-#  cache:
-#    key: "$CI_COMMIT_REF_NAME"
-#    policy: pull
-#    paths:
-#      - build
-#      - .gradle
-#  dependencies:
-#    - build
-#  artifacts:
-#    reports:
-#      junit: build/test-results/test/**/TEST-*.xml
-#      coverage_report:
-#        coverage_format: cobertura
-#        path: build/reports/jacoco/test/jacocoTestReport.xml
-#    paths:
-#      - build/reports/jacoco/test/jacocoTestReport.xml
-#  coverage: '/Total.*?([0-9,.]{1,5})%/'
-#
-#gemnasium-maven-dependency_scanning:
-#  before_script:
-#    - chmod +x gradlew
-#
-#sonarcloud-check:
-#  stage: sonar
-#  cache:
-#    key: "${CI_JOB_NAME}"
-#    paths:
-#      - .sonar/cache
-#  script: gradle sonar
-#  allow_failure: true
-#  rules:
-#    - if: '$CI_COMMIT_BRANCH == "main"'
-#    - if: '$CI_COMMIT_BRANCH != "main" && $CI_PIPELINE_SOURCE != "merge_request_event"'
-#      when: manual
-#    - when: never
+test:
+  stage: test
+  script: gradle check
+  cache:
+    key: "$CI_COMMIT_REF_NAME"
+    policy: pull
+    paths:
+      - build
+      - .gradle
+  dependencies:
+    - build
+  artifacts:
+    reports:
+      junit: build/test-results/test/**/TEST-*.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: build/reports/jacoco/test/jacocoTestReport.xml
+    paths:
+      - build/reports/jacoco/test/jacocoTestReport.xml
+  coverage: '/Total.*?([0-9,.]{1,5})%/'
+
+gemnasium-maven-dependency_scanning:
+  before_script:
+    - chmod +x gradlew
+
+sonarcloud-check:
+  stage: sonar
+  cache:
+    key: "${CI_JOB_NAME}"
+    paths:
+      - .sonar/cache
+  script: gradle sonar
+  allow_failure: true
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_COMMIT_BRANCH != "main" && $CI_PIPELINE_SOURCE != "merge_request_event"'
+      when: manual
+    - when: never
 
 publish:
   stage: publish
@@ -99,8 +99,8 @@ publish:
     - ls -la build/libs/
     - docker build --build-arg APP_VERSION=${CI_COMMIT_REF_SLUG} -t $REGISTRY/$IMAGE_NAME:$IMAGE_TAG .
     - docker push $REGISTRY/$IMAGE_NAME:$IMAGE_TAG
-  #  dependencies:
-  #    - build
+  dependencies:
+    - build
   artifacts:
     paths:
       - build/libs/*.jar
@@ -137,6 +137,6 @@ deploy_minikube:
     CLUSTER_VALUES_FILE: "./ops/springboot-app/values-minikube.yaml"
 
 
-#include:
-#  - template: Security/Dependency-Scanning.gitlab-ci.yml
-#    path: /
+include:
+  - template: Security/Dependency-Scanning.gitlab-ci.yml
+    path: /
