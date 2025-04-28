@@ -11,57 +11,12 @@ plugins {
 }
 
 group = "com.scr.project"
-//fun getGitTag(): String {
-//    return try {
-//        // Attempt to get the latest Git tag
-//        val tagProcess = ProcessBuilder("git", "describe", "--tags", "--abbrev=0").start()
-//        val tagResult = tagProcess.inputStream.bufferedReader().readText().trim()
-//        val tagExitCode = tagProcess.waitFor()
-//
-//        if (tagExitCode == 0 && tagResult.isNotEmpty()) {
-//            tagResult // Return the tag if found
-//        } else {
-//            // If no tag found, get the current branch name
-//            val branchProcess = ProcessBuilder("git", "rev-parse", "--abbrev-ref", "HEAD").start()
-//            val branchResult = branchProcess.inputStream.bufferedReader().readText().trim()
-//            val branchExitCode = branchProcess.waitFor()
-//
-//            if (branchExitCode == 0 && branchResult.isNotEmpty()) {
-//                val slugifiedBranchName = branchResult
-//                    .lowercase() // Convert to lowercase
-//                    .replace("[^a-z0-9]+".toRegex(), "-") // Replace non-alphanumeric characters (except hyphens) with hyphens
-//                    .replace("^-|-$".toRegex(), "") // Remove leading and trailing hyphens
-//                    .replace("-+".toRegex(), "-") // Replace multiple consecutive hyphens with a single hyphen
-//                if (slugifiedBranchName.isNotEmpty()) {
-//                    "$slugifiedBranchName-SNAPSHOT" // Return slugified branch name + "-SNAPSHOT"
-//                } else {
-//                    // Fallback if slugification results in an empty string (unlikely for valid branch names)
-//                    "0.0.1-SNAPSHOT"
-//                }
-//            } else {
-//                // Fallback if even branch name cannot be determined
-//                "0.0.1-SNAPSHOT"
-//            }
-//        }
-//    } catch (e: Exception) {
-//        // Catch any exceptions during process execution
-//        println("Error getting git information: ${e.message}")
-//        "0.0.1-SNAPSHOT" // Default fallback version
-//    }
-//}
 fun getGitTag(): String {
     return try {
         val tag = ProcessBuilder("git", "describe", "--tags", "--abbrev=0").start().run {
             inputStream.bufferedReader().readText().trim().takeIf { waitFor() == 0 && it.isNotEmpty() }
         }
-        tag ?: System.getenv("CI_COMMIT_REF_SLUG") ?: ProcessBuilder("git", "branch", "--show-current").start().run {
-            inputStream.bufferedReader().readText().trim().takeIf { waitFor() == 0 && it.isNotEmpty() }
-                ?.lowercase()
-                ?.replace("[^a-z0-9]+".toRegex(), "-")
-                ?.trim('-')
-                ?.replace("-+".toRegex(), "-")
-//                ?.let { "$it-SNAPSHOT" }
-        } ?: "0.0.1-SNAPSHOT"
+        tag ?: System.getenv("CI_COMMIT_REF_SLUG") ?: "0.0.1-SNAPSHOT"
     } catch (e: Exception) {
         println("Error getting git information: ${e.message}")
         "0.0.1-SNAPSHOT"
