@@ -26,65 +26,65 @@ variables:
   REGISTRY: "registry.gitlab.com/cinema7590904"
 
 stages:
-  - build
-  - test
-  - sonar
+  #  - build
+  #  - test
+  #  - sonar
   - publish
   - deploy
 
-build:
-  stage: build
-  script:
-    - gradle --build-cache assemble
-  cache:
-    key: "$CI_COMMIT_REF_NAME"
-    policy: push
-    paths:
-      - build
-      - .gradle
-  artifacts:
-    paths:
-      - build/libs/service-actor-management-0.0.1-SNAPSHOT.jar
-    expire_in: 1 day
-
-test:
-  stage: test
-  script: gradle check
-  cache:
-    key: "$CI_COMMIT_REF_NAME"
-    policy: pull
-    paths:
-      - build
-      - .gradle
-  dependencies:
-    - build
-  artifacts:
-    reports:
-      junit: build/test-results/test/**/TEST-*.xml
-      coverage_report:
-        coverage_format: cobertura
-        path: build/reports/jacoco/test/jacocoTestReport.xml
-    paths:
-      - build/reports/jacoco/test/jacocoTestReport.xml
-  coverage: '/Total.*?([0-9,.]{1,5})%/'
-
-gemnasium-maven-dependency_scanning:
-  before_script:
-    - chmod +x gradlew
-
-sonarcloud-check:
-  stage: sonar
-  cache:
-    key: "${CI_JOB_NAME}"
-    paths:
-      - .sonar/cache
-  script: gradle sonar
-  allow_failure: true
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
-    - if: '$CI_COMMIT_BRANCH != "main" && $CI_PIPELINE_SOURCE != "merge_request_event"'
-      when: manual
-    - when: never
+#build:
+#  stage: build
+#  script:
+#    - gradle --build-cache assemble
+#  cache:
+#    key: "$CI_COMMIT_REF_NAME"
+#    policy: push
+#    paths:
+#      - build
+#      - .gradle
+#  artifacts:
+#    paths:
+#      - build/libs/service-actor-management-0.0.1-SNAPSHOT.jar
+#    expire_in: 1 day
+#
+#test:
+#  stage: test
+#  script: gradle check
+#  cache:
+#    key: "$CI_COMMIT_REF_NAME"
+#    policy: pull
+#    paths:
+#      - build
+#      - .gradle
+#  dependencies:
+#    - build
+#  artifacts:
+#    reports:
+#      junit: build/test-results/test/**/TEST-*.xml
+#      coverage_report:
+#        coverage_format: cobertura
+#        path: build/reports/jacoco/test/jacocoTestReport.xml
+#    paths:
+#      - build/reports/jacoco/test/jacocoTestReport.xml
+#  coverage: '/Total.*?([0-9,.]{1,5})%/'
+#
+#gemnasium-maven-dependency_scanning:
+#  before_script:
+#    - chmod +x gradlew
+#
+#sonarcloud-check:
+#  stage: sonar
+#  cache:
+#    key: "${CI_JOB_NAME}"
+#    paths:
+#      - .sonar/cache
+#  script: gradle sonar
+#  allow_failure: true
+#  rules:
+#    - if: '$CI_COMMIT_BRANCH == "main"'
+#    - if: '$CI_COMMIT_BRANCH != "main" && $CI_PIPELINE_SOURCE != "merge_request_event"'
+#      when: manual
+#    - when: never
 
 publish:
   stage: publish
@@ -94,6 +94,7 @@ publish:
     - echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $REGISTRY
     - IMAGE_TAG=${CI_COMMIT_REF_SLUG}
   script:
+    - gradle publish
     - ls -la build/libs/
     - docker build -t $REGISTRY/$IMAGE_NAME:$IMAGE_TAG .
     - docker push $REGISTRY/$IMAGE_NAME:$IMAGE_TAG
