@@ -150,7 +150,7 @@ tasks.register<Jar>("copyAvroSchemas") {
     group = "build"
     description = "Copies Avro schema files to the build directory"
     from("src/main/avro")
-    into("${layout.buildDirectory}/schema-libs")
+    into("build/schema-libs")
     include("**/*.avsc")
 }
 
