@@ -36,6 +36,7 @@ build:
   stage: build
   script:
     - gradle --build-cache assemble
+    - ls -la build/libs # TODO: to remove
   cache:
     key: "$CI_COMMIT_REF_NAME"
     policy: push
