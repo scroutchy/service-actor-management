@@ -2,15 +2,27 @@ plugins {
     kotlin("jvm") version "2.1.20"
     kotlin("plugin.spring") version "2.1.20"
     id("org.springframework.boot") version "3.4.4"
-	id("io.spring.dependency-management") version "1.1.7"
+    id("io.spring.dependency-management") version "1.1.7"
     id("org.sonarqube") version "6.0.1.5171"
-	id("jacoco")
+    id("jacoco")
     id("com.epages.restdocs-api-spec") version "0.19.4"
     id("com.github.davidmc24.gradle.plugin.avro") version "1.9.1"
+    `maven-publish`
 }
 
 group = "com.scr.project"
-version = "0.0.1-SNAPSHOT"
+fun getGitTag(): String {
+    return try {
+        val tag = ProcessBuilder("git", "describe", "--tags", "--abbrev=0").start().run {
+            inputStream.bufferedReader().readText().trim().takeIf { waitFor() == 0 && it.isNotEmpty() }
+        }
+        tag ?: System.getenv("CI_COMMIT_REF_SLUG") ?: "0.0.1-SNAPSHOT"
+    } catch (e: Exception) {
+        println("Error getting git information: ${e.message}")
+        "0.0.1-SNAPSHOT"
+    }
+}
+version = getGitTag()
 private val jakartaValidationVersion = "3.0.2"
 private val kMongoVersion = "4.10.0"
 private val mockkVersion = "1.12.0"
@@ -18,38 +30,38 @@ private val commonsCinemaVersion = "2.1.2"
 private val testcontainersKeycloackVersion = "3.6.0"
 
 java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(17)
-	}
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
 }
 
 repositories {
-	mavenCentral()
+    mavenCentral()
     maven("https://gitlab.com/api/v4/projects/67204824/packages/maven")
     maven("https://packages.confluent.io/maven/")
 }
 
 dependencies {
-	implementation("org.springframework.boot:spring-boot-starter")
-	implementation("org.jetbrains.kotlin:kotlin-reflect")
-	implementation("org.springframework.boot:spring-boot-starter-data-mongodb-reactive")
+    implementation("org.springframework.boot:spring-boot-starter")
+    implementation("org.jetbrains.kotlin:kotlin-reflect")
+    implementation("org.springframework.boot:spring-boot-starter-data-mongodb-reactive")
     implementation("org.springframework.boot:spring-boot-starter-webflux")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
     implementation("org.springframework.kafka:spring-kafka")
-	implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
+    implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
     implementation("io.projectreactor.kafka:reactor-kafka")
     implementation("org.apache.avro:avro:1.12.0")
     implementation("jakarta.validation:jakarta.validation-api:$jakartaValidationVersion")
     implementation("com.scr.project.commons.cinema:commons-cinema:$commonsCinemaVersion")
     implementation("io.confluent:kafka-avro-serializer:7.9.0")
     testImplementation("com.scr.project.commons.cinema.test:commons-cinema-test:$commonsCinemaVersion")
-	testImplementation("org.springframework.boot:spring-boot-starter-test")
-	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
-	testImplementation("io.projectreactor:reactor-test")
-	testImplementation("org.testcontainers:testcontainers")
-	testImplementation("org.testcontainers:junit-jupiter")
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
+    testImplementation("io.projectreactor:reactor-test")
+    testImplementation("org.testcontainers:testcontainers")
+    testImplementation("org.testcontainers:junit-jupiter")
     testImplementation("org.testcontainers:mongodb")
     testImplementation("org.testcontainers:kafka")
     testImplementation("org.litote.kmongo:kmongo:$kMongoVersion")
@@ -69,13 +81,13 @@ dependencies {
             module = "spring-boot-starter-web"
         )
     }
-	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 kotlin {
-	compilerOptions {
-		freeCompilerArgs.addAll("-Xjsr305=strict")
-	}
+    compilerOptions {
+        freeCompilerArgs.addAll("-Xjsr305=strict")
+    }
 }
 
 
@@ -133,6 +145,52 @@ openapi3 {
     description = "This application aims to manage the actors and their main characteristics"
     format = "yaml"
 }
+
+tasks.register<Jar>("copyAvroSchemas") {
+    group = "build"
+    description = "Copies Avro schema files to the build directory"
+    from("src/main/avro")
+    into("build/schema-libs")
+    include("**/*.avsc")
+}
+
+artifacts {
+    archives(tasks["copyAvroSchemas"]) {
+        classifier = "schemas"
+    }
+}
+
+
+publishing {
+    publications {
+        create<MavenPublication>("avroSchemas") {
+            from(components["java"])
+            artifact(tasks["copyAvroSchemas"]) {
+                classifier = "schemas"
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            url = uri("${System.getenv("CI_API_V4_URL")}/projects/${System.getenv("CI_PROJECT_ID")}/packages/maven")
+            credentials(HttpHeaderCredentials::class.java) {
+                name = "Job-Token"
+                value = System.getenv("CI_JOB_TOKEN")
+            }
+            authentication { create("header", HttpHeaderAuthentication::class.java) }
+        }
+    }
+}
+
+tasks.register("publishToGitLab") {
+    group = "publishing"
+    description = "Publish the project to GitLab Maven repository"
+    dependsOn("generateAvroJava") // Générer les classes avant publication
+    dependsOn("copyAvroSchemas")  // Copier les schémas avant publication
+    dependsOn("publish")          // Lancer la publication
+}
+
 
 afterEvaluate {
     tasks.findByName("openapi3")?.finalizedBy(tasks.register<Copy>("copyApiSpecToDocs") {

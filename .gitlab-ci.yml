@@ -36,6 +36,7 @@ build:
   stage: build
   script:
     - gradle --build-cache assemble
+    - ls -la build/libs # TODO: to remove
   cache:
     key: "$CI_COMMIT_REF_NAME"
     policy: push
@@ -44,7 +45,7 @@ build:
       - .gradle
   artifacts:
     paths:
-      - build/libs/service-actor-management-0.0.1-SNAPSHOT.jar
+      - build/libs/service-actor-management-${CI_COMMIT_REF_SLUG}.jar
     expire_in: 1 day
 
 test:
@@ -94,8 +95,9 @@ publish:
     - echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $REGISTRY
     - IMAGE_TAG=${CI_COMMIT_REF_SLUG}
   script:
+    - gradle publish
     - ls -la build/libs/
-    - docker build -t $REGISTRY/$IMAGE_NAME:$IMAGE_TAG .
+    - docker build --build-arg APP_VERSION=${CI_COMMIT_REF_SLUG} -t $REGISTRY/$IMAGE_NAME:$IMAGE_TAG .
     - docker push $REGISTRY/$IMAGE_NAME:$IMAGE_TAG
   dependencies:
     - build
