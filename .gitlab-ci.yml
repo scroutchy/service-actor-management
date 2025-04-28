@@ -98,8 +98,8 @@ publish:
     - ls -la build/libs/
     - docker build -t $REGISTRY/$IMAGE_NAME:$IMAGE_TAG .
     - docker push $REGISTRY/$IMAGE_NAME:$IMAGE_TAG
-  dependencies:
-    - build
+    #  dependencies:
+    - #build
   artifacts:
     paths:
       - build/libs/*.jar
