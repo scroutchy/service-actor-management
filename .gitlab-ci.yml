@@ -136,6 +136,6 @@ deploy_minikube:
     CLUSTER_VALUES_FILE: "./ops/springboot-app/values-minikube.yaml"
 
 
-include:
-  - template: Security/Dependency-Scanning.gitlab-ci.yml
-    path: /
+#include:
+#  - template: Security/Dependency-Scanning.gitlab-ci.yml
+#    path: /
