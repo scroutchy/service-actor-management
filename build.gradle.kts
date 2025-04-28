@@ -54,7 +54,7 @@ fun getGitTag(): String {
         val tag = ProcessBuilder("git", "describe", "--tags", "--abbrev=0").start().run {
             inputStream.bufferedReader().readText().trim().takeIf { waitFor() == 0 && it.isNotEmpty() }
         }
-        tag ?: ProcessBuilder("git", "branch", "--show-current").start().run {
+        tag ?: System.getenv("CI_COMMIT_REF_SLUG") ?: ProcessBuilder("git", "branch", "--show-current").start().run {
             inputStream.bufferedReader().readText().trim().takeIf { waitFor() == 0 && it.isNotEmpty() }
                 ?.lowercase()
                 ?.replace("[^a-z0-9]+".toRegex(), "-")
