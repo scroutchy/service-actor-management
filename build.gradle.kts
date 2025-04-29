@@ -148,26 +148,34 @@ openapi3 {
 
 tasks.register<Jar>("copyAvroSchemas") {
     group = "build"
-    description = "Copies Avro schema files to the build directory"
-    from("src/main/avro")
-    into("build/schema-libs")
+    description = "Packages Avro schema files into a publishable JAR with 'schemas' classifier"
+//    from("src/main/avro")
+//    into("build/schema-libs")
+//    include("**/*.avsc")
+    archiveClassifier.set("schemas") // Définit le classifier 'schemas'
+    archiveBaseName.set("service-actor-management") // Nom de base (souvent nom du projet)
+//    archiveVersion.set(project.version) // Version (définie par getGitTag())
+    archiveFileName.set("${archiveBaseName.get()}-${archiveVersion.get()}-${archiveClassifier.get()}.jar") // Nom complet du fichier
+    destinationDirectory.set(layout.buildDirectory.dir("libs")) // build/libs
+    from("src/main/avro") { /* ... */ }
     include("**/*.avsc")
 }
-
-artifacts {
-    archives(tasks["copyAvroSchemas"]) {
-        classifier = "schemas"
-    }
-}
+//artifacts {
+//    archives(tasks["copyAvroSchemas"]) {
+//        classifier = "schemas"
+//    }
+//}
 
 
 publishing {
     publications {
         create<MavenPublication>("avroSchemas") {
-            from(components["java"])
-            artifact(tasks["copyAvroSchemas"]) {
-                classifier = "schemas"
-            }
+//            from(components["java"])
+//            artifact(tasks["copyAvroSchemas"]) {
+//                classifier = "schemas"
+//            }
+            artifact(tasks.named<Jar>("bootJar"))
+            artifact(tasks.named<Jar>("copyAvroSchemas"))
         }
     }
 
@@ -186,9 +194,10 @@ publishing {
 tasks.register("publishToGitLab") {
     group = "publishing"
     description = "Publish the project to GitLab Maven repository"
-    dependsOn("generateAvroJava") // Générer les classes avant publication
-    dependsOn("copyAvroSchemas")  // Copier les schémas avant publication
-    dependsOn("publish")          // Lancer la publication
+//    dependsOn("generateAvroJava") // Générer les classes avant publication
+//    dependsOn("copyAvroSchemas")  // Copier les schémas avant publication
+//    dependsOn("publish")          // Lancer la publication
+    dependsOn("publishMavenJavaPublicationToMavenRepository")
 }
 
 
