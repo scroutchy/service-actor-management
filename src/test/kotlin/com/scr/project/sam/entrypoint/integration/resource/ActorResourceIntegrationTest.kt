@@ -4,7 +4,6 @@ import com.epages.restdocs.apispec.ResourceDocumentation.resource
 import com.epages.restdocs.apispec.ResourceSnippetParameters
 import com.epages.restdocs.apispec.WebTestClientRestDocumentationWrapper
 import com.scr.project.sam.AbstractIntegrationTest
-import com.scr.project.sam.RewardedEntityTypeKafkaDto.ACTOR
 import com.scr.project.sam.RewardedKafkaTestConsumer
 import com.scr.project.sam.TestKafkaConfig
 import com.scr.project.sam.domains.actor.dao.ActorDao
@@ -16,6 +15,7 @@ import com.scr.project.sam.entrypoint.model.api.ActorApiDto
 import com.scr.project.sam.entrypoint.model.api.ActorUpdateRequestApiDto
 import com.scr.project.sam.entrypoint.resource.ApiConstants.ACTOR_PATH
 import com.scr.project.sam.entrypoint.resource.ApiConstants.ID_PATH
+import com.scr.project.srm.RewardedEntityTypeKafkaDto.ACTOR
 import org.assertj.core.api.Assertions.assertThat
 import org.bson.types.ObjectId
 import org.junit.jupiter.api.BeforeEach

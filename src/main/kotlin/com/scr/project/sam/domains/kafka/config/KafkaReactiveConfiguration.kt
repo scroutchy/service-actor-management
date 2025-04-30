@@ -1,6 +1,6 @@
 package com.scr.project.sam.domains.kafka.config
 
-import com.scr.project.sam.RewardedKafkaDto
+import com.scr.project.srm.RewardedKafkaDto
 import io.confluent.kafka.serializers.KafkaAvroSerializer
 import org.apache.kafka.clients.producer.ProducerConfig.BOOTSTRAP_SERVERS_CONFIG
 import org.apache.kafka.clients.producer.ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG

@@ -1,3 +1,5 @@
+import com.github.davidmc24.gradle.plugin.avro.GenerateAvroJavaTask
+
 plugins {
     kotlin("jvm") version "2.1.20"
     kotlin("plugin.spring") version "2.1.20"
@@ -26,7 +28,12 @@ java {
 repositories {
 	mavenCentral()
     maven("https://gitlab.com/api/v4/projects/67204824/packages/maven")
+    maven("https://gitlab.com/api/v4/projects/69406479/packages/maven")
     maven("https://packages.confluent.io/maven/")
+}
+
+configurations {
+    create("avroSchemas")
 }
 
 dependencies {
@@ -44,6 +51,7 @@ dependencies {
     implementation("jakarta.validation:jakarta.validation-api:$jakartaValidationVersion")
     implementation("com.scr.project.commons.cinema:commons-cinema:$commonsCinemaVersion")
     implementation("io.confluent:kafka-avro-serializer:7.9.0")
+    add("avroSchemas", "org.scr.project:service-rewarded-management:0.1.1:schemas")
     testImplementation("com.scr.project.commons.cinema.test:commons-cinema-test:$commonsCinemaVersion")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
@@ -70,6 +78,16 @@ dependencies {
         )
     }
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+val extractAvroSchemas by tasks.registering(Copy::class) {
+    from(configurations["avroSchemas"].map { zipTree(it) })
+    include("**/*.avsc")
+    into(layout.buildDirectory.dir("schemas-libs"))
+}
+
+tasks.named<GenerateAvroJavaTask>("generateAvroJava") {
+    dependsOn(extractAvroSchemas)
+    source(layout.buildDirectory.dir("schemas-libs"))
 }
 
 kotlin {
