@@ -1,7 +1,7 @@
 plugins {
     kotlin("jvm") version "2.1.20"
     kotlin("plugin.spring") version "2.1.20"
-    id("org.springframework.boot") version "3.4.4"
+    id("org.springframework.boot") version "3.4.5"
 	id("io.spring.dependency-management") version "1.1.7"
     id("org.sonarqube") version "6.0.1.5171"
 	id("jacoco")
@@ -14,7 +14,7 @@ version = "0.0.1-SNAPSHOT"
 private val jakartaValidationVersion = "3.0.2"
 private val kMongoVersion = "4.10.0"
 private val mockkVersion = "1.12.0"
-private val commonsCinemaVersion = "2.1.2"
+private val commonsCinemaVersion = "2.1.4"
 private val testcontainersKeycloackVersion = "3.6.0"
 
 java {
