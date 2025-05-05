@@ -1,8 +1,8 @@
 package com.scr.project.sam.domains.actor.messaging.v1
 
-import com.scr.project.sam.RewardedKafkaDto
 import com.scr.project.sam.config.TopicProperties
 import com.scr.project.sam.domains.actor.model.entity.Actor
+import com.scr.project.srm.RewardedKafkaDto
 import io.mockk.clearMocks
 import io.mockk.confirmVerified
 import io.mockk.every

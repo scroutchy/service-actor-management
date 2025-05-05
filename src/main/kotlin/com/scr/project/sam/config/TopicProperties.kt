@@ -9,7 +9,7 @@ import org.springframework.validation.annotation.Validated
 @ConfigurationProperties(PREFIX)
 data class TopicProperties(
     @field:NotBlank
-    val actorCreationNotification: String = "sam-rewarded-entity-creation-events"
+    val actorCreationNotification: String = "srm-rewarded-entity-creation-events"
 ) {
 
     companion object {

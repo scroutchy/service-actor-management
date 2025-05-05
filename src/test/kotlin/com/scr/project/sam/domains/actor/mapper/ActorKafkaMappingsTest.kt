@@ -1,7 +1,7 @@
 package com.scr.project.sam.domains.actor.mapper
 
-import com.scr.project.sam.RewardedEntityTypeKafkaDto.ACTOR
 import com.scr.project.sam.domains.actor.model.entity.Actor
+import com.scr.project.srm.RewardedEntityTypeKafkaDto.ACTOR
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
