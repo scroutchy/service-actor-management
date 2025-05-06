@@ -16,7 +16,7 @@ version = "0.0.1-SNAPSHOT"
 private val jakartaValidationVersion = "3.0.2"
 private val kMongoVersion = "4.10.0"
 private val mockkVersion = "1.12.0"
-private val commonsCinemaVersion = "2.1.4"
+private val commonsCinemaVersion = "2.2.0"
 private val testcontainersKeycloackVersion = "3.6.0"
 
 java {
@@ -50,6 +50,7 @@ dependencies {
     implementation("org.apache.avro:avro:1.12.0")
     implementation("jakarta.validation:jakarta.validation-api:$jakartaValidationVersion")
     implementation("com.scr.project.commons.cinema:commons-cinema:$commonsCinemaVersion")
+    implementation("com.scr.project.commons.cinema:commons-cinema-kafka:${commonsCinemaVersion}")
     implementation("io.confluent:kafka-avro-serializer:7.9.0")
     add("avroSchemas", "org.scr.project:service-rewarded-management:0.1.1:schemas")
     testImplementation("com.scr.project.commons.cinema.test:commons-cinema-test:$commonsCinemaVersion")

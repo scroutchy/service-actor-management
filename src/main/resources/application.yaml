@@ -6,11 +6,7 @@ spring:
           issuer-uri: http://keycloak.keycloak.svc.cluster.local/realms/cinema
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
-      properties:
-        schema.registry.url: ${SCHEMA_REGISTRY_URL}
+    schema.registry.url: ${SCHEMA_REGISTRY_URL}
     security-protocol: SASL_PLAINTEXT
     sasl:
       mechanism: PLAIN
