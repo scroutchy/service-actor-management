@@ -14,7 +14,7 @@ class TestKafkaConfig {
     @Bean
     fun testRewardedConsumer(
         @Value("\${spring.kafka.bootstrap-servers}") bootstrapServers: String,
-        @Value("\${spring.kafka.producer.properties.schema.registry.url}") schemaRegistryUrl: String,
+        @Value("\${spring.kafka.schema.registry.url}") schemaRegistryUrl: String,
         topicProperties: TopicProperties
     ) = RewardedKafkaTestConsumer(bootstrapServers, schemaRegistryUrl, topicProperties.actorCreationNotification)
 }

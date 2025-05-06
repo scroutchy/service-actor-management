@@ -55,7 +55,7 @@ abstract class AbstractIntegrationTest {
             registry.add("spring.data.mongodb.uri", mongoDBContainer::getReplicaSetUrl)
             registry.add("spring.security.oauth2.resourceserver.jwt.issuer-uri") { "${keycloakContainer.authServerUrl}/realms/my-realm" }
             registry.add("spring.kafka.bootstrap-servers") { kafkaContainer.bootstrapServers }
-            registry.add("spring.kafka.producer.properties.schema.registry.url") {
+            registry.add("spring.kafka.schema.registry.url") {
                 "http://${schemaRegistryContainer.host}:${schemaRegistryContainer.getMappedPort(8081)}"
             }
         }

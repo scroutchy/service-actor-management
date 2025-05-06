@@ -6,9 +6,7 @@ spring:
       uri: mongodb://mongodb:27017/test
   kafka:
     bootstrap-servers: kafka:9092
-    producer:
-      properties:
-        schema.registry.url: http://schema-registry:8081
+    schema.registry.url: http://schema-registry:8081
     security-protocol: PLAINTEXT
     sasl:
       mechanism:
