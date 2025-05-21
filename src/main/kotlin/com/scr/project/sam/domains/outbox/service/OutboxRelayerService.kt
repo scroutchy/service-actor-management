@@ -2,46 +2,64 @@ package com.scr.project.sam.domains.outbox.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.scr.project.sam.domains.outbox.model.entity.Outbox
+import com.scr.project.sam.domains.outbox.model.entity.OutboxStatus.PENDING
+import com.scr.project.sam.domains.outbox.model.entity.OutboxStatus.PROCESSING
 import com.scr.project.sam.domains.outbox.repository.OutboxRepository
+import com.scr.project.sam.domains.outbox.repository.SimpleOutboxRepository
+import jakarta.annotation.PostConstruct
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.bson.types.ObjectId
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
+import reactor.core.Disposable
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.kafka.sender.KafkaSender
 import reactor.kafka.sender.SenderRecord
 import reactor.kotlin.core.publisher.toMono
+import java.time.Duration
 
 @Service
 class OutboxRelayerService(
+    private val simpleOutboxRepository: SimpleOutboxRepository,
     private val outboxRepository: OutboxRepository,
     private val kafkaSender: KafkaSender<String, Any>,
     private val objectMapper: ObjectMapper
 ) {
 
     private val logger: Logger = LoggerFactory.getLogger(OutboxRelayerService::class.java)
+    private var pollingDisposable: Disposable? = null
 
-    @Scheduled(fixedDelay = 1000, initialDelayString = "\${outbox.initialDelay:0}")
-    fun processOutbox() {
-        outboxRepository.findAll()
-            .flatMapSequential {
-                logger.debug("Processing outbox event: {}", it.id)
-                processSingleOutboxEvent(it)
-                    .onErrorResume { e ->
-                        logger.warn("Error processing outbox event ${it.id}: ${e.message}")
-                        Mono.empty()
-                    }
-            }
-            .subscribe(
-                { logger.debug("Outbox event processing step completed.") },
-                { e -> logger.warn("Error during outbox processing loop: {}", e.message, e) },
-                { logger.debug("Outbox relayer scan completed.") }
-            )
+    fun pollAndProcess(pollInterval: Duration = Duration.ofSeconds(1)): Flux<Outbox> {
+        return Flux.interval(pollInterval)
+            .flatMap { processOutbox() }
     }
 
-    private fun processSingleOutboxEvent(outbox: Outbox): Mono<Unit> {
+    @PostConstruct
+    fun startPolling() {
+        pollingDisposable?.dispose()
+        pollingDisposable = pollAndProcess().subscribe()
+    }
+
+    fun stopPolling() {
+        pollingDisposable?.dispose()
+    }
+
+    fun processOutbox(): Flux<Outbox> {
+        return simpleOutboxRepository.findAllByStatus(PENDING)
+            .flatMapSequential {
+                logger.debug("Processing outbox event: {}", it.id)
+                outboxRepository.updateStatus(it.id, PROCESSING)
+                    .flatMap { processSingleOutboxEvent(it) }
+                    .onErrorResume { e ->
+                        logger.warn("Error processing outbox event ${it.id}: ${e.message}")
+                        outboxRepository.updateStatus(it.id, PENDING)
+                    }
+            }
+    }
+
+    private fun processSingleOutboxEvent(outbox: Outbox): Mono<Outbox> {
         return createSenderRecord(outbox)
             .flatMap { kafkaSender.send(it.toMono()).singleOrEmpty() }
             .doOnSuccess {
@@ -51,11 +69,11 @@ class OutboxRelayerService(
                 )
             }
             .doOnError { e -> logger.warn("Failed to send outbox event {} to Kafka: {}", outbox.id, e.message, e) }
-            .flatMap { outboxRepository.delete(outbox) }
+            .flatMap { simpleOutboxRepository.delete(outbox) }
             .doOnSubscribe { logger.debug("Deleting outbox event {} after successful sending.", outbox.id) }
             .doOnSuccess { logger.debug("Outbox event {} successfully deleted.", outbox.id) }
             .doOnError { logger.warn("Failed to delete outbox event {}: {}", outbox.id, it.message) }
-            .thenReturn(Unit)
+            .thenReturn(outbox)
     }
 
     private fun createSenderRecord(outbox: Outbox): Mono<SenderRecord<String, Any, ObjectId>> {

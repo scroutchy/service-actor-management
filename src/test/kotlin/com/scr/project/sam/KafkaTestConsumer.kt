@@ -38,9 +38,12 @@ class KafkaTestConsumer<V>(
         consumer.subscribe(listOf(topic))
     }
 
-    fun poll(timeout: Duration = Duration.ofSeconds(10)) = consumer.poll(timeout).map { it.value() }
+    fun poll(timeout: Duration = Duration.ofSeconds(1)) = consumer.poll(timeout).map { it.value() }
 
-    fun clearTopic() = consumer.seekToEnd(consumer.assignment())
+    fun clearTopic() {
+        consumer.poll(Duration.ZERO)
+        consumer.seekToEnd(consumer.assignment())
+    }
 
     fun close() = consumer.close()
 }
