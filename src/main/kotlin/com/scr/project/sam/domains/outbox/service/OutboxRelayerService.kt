@@ -6,19 +6,16 @@ import com.scr.project.sam.domains.outbox.model.entity.OutboxStatus.PENDING
 import com.scr.project.sam.domains.outbox.model.entity.OutboxStatus.PROCESSING
 import com.scr.project.sam.domains.outbox.repository.OutboxRepository
 import com.scr.project.sam.domains.outbox.repository.SimpleOutboxRepository
-import jakarta.annotation.PostConstruct
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.bson.types.ObjectId
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import reactor.core.Disposable
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.kafka.sender.KafkaSender
 import reactor.kafka.sender.SenderRecord
 import reactor.kotlin.core.publisher.toMono
-import java.time.Duration
 
 @Service
 class OutboxRelayerService(
@@ -29,22 +26,6 @@ class OutboxRelayerService(
 ) {
 
     private val logger: Logger = LoggerFactory.getLogger(OutboxRelayerService::class.java)
-    private var pollingDisposable: Disposable? = null
-
-    fun pollAndProcess(pollInterval: Duration = Duration.ofSeconds(1)): Flux<Outbox> {
-        return Flux.interval(pollInterval)
-            .flatMap { processOutbox() }
-    }
-
-    @PostConstruct
-    fun startPolling() {
-        pollingDisposable?.dispose()
-        pollingDisposable = pollAndProcess().subscribe()
-    }
-
-    fun stopPolling() {
-        pollingDisposable?.dispose()
-    }
 
     fun processOutbox(): Flux<Outbox> {
         return simpleOutboxRepository.findAllByStatus(PENDING)
@@ -60,20 +41,21 @@ class OutboxRelayerService(
     }
 
     private fun processSingleOutboxEvent(outbox: Outbox): Mono<Outbox> {
-        return createSenderRecord(outbox)
-            .flatMap { kafkaSender.send(it.toMono()).singleOrEmpty() }
-            .doOnSuccess {
-                logger.info(
-                    "Outbox event {} successfully sent to Kafka (Offset: {}, Partition: {}).",
-                    outbox.id, it?.recordMetadata()?.offset(), it?.recordMetadata()?.partition()
-                )
-            }
-            .doOnError { e -> logger.warn("Failed to send outbox event {} to Kafka: {}", outbox.id, e.message, e) }
-            .flatMap { simpleOutboxRepository.delete(outbox) }
-            .doOnSubscribe { logger.debug("Deleting outbox event {} after successful sending.", outbox.id) }
-            .doOnSuccess { logger.debug("Outbox event {} successfully deleted.", outbox.id) }
-            .doOnError { logger.warn("Failed to delete outbox event {}: {}", outbox.id, it.message) }
-            .thenReturn(outbox)
+        return outbox.toMono().delayUntil {
+            createSenderRecord(it)
+                .flatMap { kafkaSender.send(it.toMono()).singleOrEmpty() }
+                .doOnSuccess {
+                    logger.info(
+                        "Outbox event {} successfully sent to Kafka (Offset: {}, Partition: {}).",
+                        outbox.id, it?.recordMetadata()?.offset(), it?.recordMetadata()?.partition()
+                    )
+                }
+                .doOnError { e -> logger.warn("Failed to send outbox event {} to Kafka: {}", outbox.id, e.message, e) }
+                .flatMap { simpleOutboxRepository.delete(outbox) }
+                .doOnSubscribe { logger.debug("Deleting outbox event {} after successful sending.", outbox.id) }
+                .doOnSuccess { logger.debug("Outbox event {} successfully deleted.", outbox.id) }
+                .doOnError { logger.warn("Failed to delete outbox event {}: {}", outbox.id, it.message) }
+        }
     }
 
     private fun createSenderRecord(outbox: Outbox): Mono<SenderRecord<String, Any, ObjectId>> {
