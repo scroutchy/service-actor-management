@@ -1,7 +1,7 @@
 package com.scr.project.sam.domains.outbox.service
 
 import com.scr.project.sam.domains.outbox.model.entity.Outbox
-import com.scr.project.sam.domains.outbox.repository.OutboxRepository
+import com.scr.project.sam.domains.outbox.repository.SimpleOutboxRepository
 import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
@@ -13,13 +13,13 @@ import reactor.kotlin.test.test
 
 class OutboxServiceTest {
 
-    private val outboxRepository = mockk<OutboxRepository>()
-    private val outboxService = OutboxService(outboxRepository)
+    private val simpleOutboxRepository = mockk<SimpleOutboxRepository>()
+    private val outboxService = OutboxService(simpleOutboxRepository)
 
     @Test
     fun `send should succeed`() {
         val outbox = Outbox("type", "id", "{\"key\": \"value\"}", "topic")
-        every { outboxRepository.insert(any<Outbox>()) } answers { outbox.toMono() }
+        every { simpleOutboxRepository.insert(any<Outbox>()) } answers { outbox.toMono() }
         outboxService.send(outbox)
             .test()
             .expectSubscription()
@@ -30,7 +30,7 @@ class OutboxServiceTest {
                 assertThat(it.payload).isEqualTo(outbox.payload)
                 assertThat(it.topic).isEqualTo(outbox.topic)
             }.verifyComplete()
-        verify(exactly = 1) { outboxRepository.insert(outbox) }
-        confirmVerified(outboxRepository)
+        verify(exactly = 1) { simpleOutboxRepository.insert(outbox) }
+        confirmVerified(simpleOutboxRepository)
     }
 }

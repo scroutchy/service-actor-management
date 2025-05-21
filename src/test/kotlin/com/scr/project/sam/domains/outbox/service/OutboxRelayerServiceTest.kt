@@ -2,7 +2,10 @@ package com.scr.project.sam.domains.outbox.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.scr.project.sam.domains.outbox.model.entity.Outbox
+import com.scr.project.sam.domains.outbox.model.entity.OutboxStatus.PENDING
+import com.scr.project.sam.domains.outbox.model.entity.OutboxStatus.PROCESSING
 import com.scr.project.sam.domains.outbox.repository.OutboxRepository
+import com.scr.project.sam.domains.outbox.repository.SimpleOutboxRepository
 import com.scr.project.srm.RewardedKafkaDto
 import io.mockk.clearMocks
 import io.mockk.confirmVerified
@@ -21,19 +24,22 @@ import reactor.kafka.sender.KafkaSender
 import reactor.kafka.sender.SenderRecord
 import reactor.kafka.sender.SenderResult
 import reactor.kotlin.core.publisher.toFlux
+import reactor.kotlin.core.publisher.toMono
+import reactor.kotlin.test.test
 
 class OutboxRelayerServiceTest {
 
+    private val simpleOutboxRepository = mockk<SimpleOutboxRepository>()
     private val outboxRepository = mockk<OutboxRepository>()
     private val kafkaSender = mockk<KafkaSender<String, Any>>()
     private val objectMapper = ObjectMapper()
-    private val outboxRelayerService = OutboxRelayerService(outboxRepository, kafkaSender, objectMapper)
+    private val outboxRelayerService = OutboxRelayerService(simpleOutboxRepository, outboxRepository, kafkaSender, objectMapper)
     private val outbox = Outbox(RewardedKafkaDto::class.java.name, "id", "{ \"id\": \"value\", \"type\": \"ACTOR\" }", "topic")
     private val senderRecordSlot = slot<Mono<SenderRecord<String, Any, ObjectId>>>()
 
     @BeforeEach
     fun setUp() {
-        clearMocks(outboxRepository, kafkaSender)
+        clearMocks(simpleOutboxRepository, outboxRepository, kafkaSender)
         every { kafkaSender.send(capture(senderRecordSlot)) } answers {
             val capturedRecord = senderRecordSlot.captured.block() // Blocking is acceptable in tests
             val correlationId = capturedRecord?.correlationMetadata()
@@ -46,65 +52,102 @@ class OutboxRelayerServiceTest {
             every { mockSenderResult.exception() } returns null // Indicate no exception
             Flux.just(mockSenderResult)
         }
+        every { outboxRepository.updateStatus(outbox.id, PROCESSING) } answers { outbox.copy(status = PROCESSING).toMono() }
+        every { outboxRepository.updateStatus(outbox.id, PENDING) } answers { outbox.copy(status = PENDING).toMono() }
     }
 
     @Test
     fun `processOutbox should succeed when outbox is empty`() {
-        every { outboxRepository.findAll() } answers { Flux.empty() }
+        every { simpleOutboxRepository.findAllByStatus(PENDING) } answers { Flux.empty() }
         outboxRelayerService.processOutbox()
-        verify(exactly = 1) { outboxRepository.findAll() }
+            .test()
+            .expectSubscription()
+            .expectNextCount(0)
+            .verifyComplete()
+        verify(exactly = 1) { simpleOutboxRepository.findAllByStatus(PENDING) }
         verify(inverse = true) { kafkaSender.send<Publisher<SenderRecord<String, RewardedKafkaDto, String>>>(any()) }
-        verify(inverse = true) { outboxRepository.delete(any()) }
-        confirmVerified(outboxRepository, kafkaSender)
+        verify(inverse = true) { simpleOutboxRepository.delete(any()) }
+        confirmVerified(simpleOutboxRepository, outboxRepository, kafkaSender)
     }
 
     @Test
     fun `processOutbox should succeed when outbox contains one document`() {
-        every { outboxRepository.findAll() } answers { listOf(outbox).toFlux() }
-        every { outboxRepository.delete(outbox) } answers { Mono.empty() }
+        every { simpleOutboxRepository.findAllByStatus(PENDING) } answers { listOf(outbox).toFlux() }
+        every { simpleOutboxRepository.delete(outbox.copy(status = PROCESSING)) } answers { Mono.empty() }
         outboxRelayerService.processOutbox()
-        verify(exactly = 1) { outboxRepository.findAll() }
+            .test()
+            .expectSubscription()
+            .expectNextCount(1)
+            .verifyComplete()
+        verify(exactly = 1) { simpleOutboxRepository.findAllByStatus(PENDING) }
+        verify(exactly = 1) { outboxRepository.updateStatus(outbox.id, PROCESSING) }
         verify(exactly = 1) { kafkaSender.send(any<Mono<SenderRecord<String, Any, ObjectId>>>()) }
-        verify(exactly = 1) { outboxRepository.delete(outbox) }
-        confirmVerified(outboxRepository, kafkaSender)
+        verify(exactly = 1) { simpleOutboxRepository.delete(outbox.copy(status = PROCESSING)) }
+        confirmVerified(simpleOutboxRepository, outboxRepository, kafkaSender)
     }
 
     @Test
     fun `processOutbox should handle kafka exception and not delete outbox record`() {
-        every { outboxRepository.findAll() } answers { listOf(outbox).toFlux() }
+        every { simpleOutboxRepository.findAllByStatus(PENDING) } answers { listOf(outbox).toFlux() }
         every { kafkaSender.send(any<Mono<SenderRecord<String, Any, ObjectId>>>()) } answers {
             Flux.error(RuntimeException("Kafka send failed"))
         }
         outboxRelayerService.processOutbox()
-        verify(exactly = 1) { outboxRepository.findAll() }
+            .test()
+            .expectSubscription()
+            .expectNextCount(1)
+            .verifyComplete()
+        verify(exactly = 1) { simpleOutboxRepository.findAllByStatus(PENDING) }
         verify(exactly = 1) { kafkaSender.send(any<Mono<SenderRecord<String, Any, ObjectId>>>()) }
-        verify(inverse = true) { outboxRepository.delete(outbox) }
-        confirmVerified(outboxRepository, kafkaSender)
+        verify(exactly = 1) { outboxRepository.updateStatus(outbox.id, PROCESSING) }
+        verify(exactly = 1) { outboxRepository.updateStatus(outbox.id, PENDING) }
+        verify(inverse = true) { simpleOutboxRepository.delete(outbox) }
+        verify(inverse = true) { simpleOutboxRepository.delete(outbox.copy(status = PROCESSING)) }
+        confirmVerified(simpleOutboxRepository, outboxRepository, kafkaSender)
     }
 
     @Test
     fun `processOutbox should handle when deletion of outbox fails`() {
-        every { outboxRepository.findAll() } answers { listOf(outbox).toFlux() }
-        every { outboxRepository.delete(outbox) } answers { Mono.error(RuntimeException("Delete failed")) }
+        every { simpleOutboxRepository.findAllByStatus(PENDING) } answers { listOf(outbox).toFlux() }
+        every { simpleOutboxRepository.delete(outbox.copy(status = PROCESSING)) } answers { Mono.error(RuntimeException("Delete failed")) }
         outboxRelayerService.processOutbox()
-        verify(exactly = 1) { outboxRepository.findAll() }
+            .test()
+            .expectSubscription()
+            .expectNextCount(1)
+            .verifyComplete()
+        verify(exactly = 1) { simpleOutboxRepository.findAllByStatus(PENDING) }
+        verify(exactly = 1) { outboxRepository.updateStatus(outbox.id, PROCESSING) }
+        verify(exactly = 1) { outboxRepository.updateStatus(outbox.id, PENDING) }
         verify(exactly = 1) { kafkaSender.send(any<Mono<SenderRecord<String, Any, ObjectId>>>()) }
-        verify(exactly = 1) { outboxRepository.delete(outbox) }
-        confirmVerified(outboxRepository, kafkaSender)
+        verify(exactly = 1) { simpleOutboxRepository.delete(outbox.copy(status = PROCESSING)) }
+        confirmVerified(simpleOutboxRepository, outboxRepository, kafkaSender)
     }
 
     @Test
     fun `processOutbox should succeed when more than one document in outbox and reject unknown types`() {
         val outbox1 = Outbox(RewardedKafkaDto::class.java.name, "id", "{ \"id\": \"value1\", \"type\": \"MOVIE\" }", "topic")
         val outbox2 = Outbox("dummy", "id", "{ \"id\": \"value1\", \"surname\": \"surname\", \"name\": \"name\" }", "topic")
-        every { outboxRepository.findAll() } answers { listOf(outbox, outbox1, outbox2).toFlux() }
-        every { outboxRepository.delete(any<Outbox>()) } answers { Mono.empty() }
+        every { simpleOutboxRepository.findAllByStatus(PENDING) } answers { listOf(outbox, outbox1, outbox2).toFlux() }
+        every { simpleOutboxRepository.delete(any<Outbox>()) } answers { Mono.empty() }
+        every { outboxRepository.updateStatus(outbox1.id, PROCESSING) } answers { outbox1.copy(status = PROCESSING).toMono() }
+        every { outboxRepository.updateStatus(outbox2.id, PROCESSING) } answers { outbox2.copy(status = PROCESSING).toMono() }
+        every { outboxRepository.updateStatus(outbox2.id, PENDING) } answers { outbox2.copy(status = PENDING).toMono() }
         outboxRelayerService.processOutbox()
-        verify(exactly = 1) { outboxRepository.findAll() }
+            .test()
+            .expectSubscription()
+            .expectNextCount(3)
+            .verifyComplete()
+        verify(exactly = 1) { simpleOutboxRepository.findAllByStatus(PENDING) }
+        verify(exactly = 1) { outboxRepository.updateStatus(outbox.id, PROCESSING) }
+        verify(exactly = 1) { outboxRepository.updateStatus(outbox1.id, PROCESSING) }
+        verify(exactly = 1) { outboxRepository.updateStatus(outbox2.id, PROCESSING) }
+        verify(exactly = 1) { outboxRepository.updateStatus(outbox2.id, PENDING) }
         verify(exactly = 2) { kafkaSender.send(any<Mono<SenderRecord<String, Any, ObjectId>>>()) }
-        verify(exactly = 1) { outboxRepository.delete(outbox) }
-        verify(exactly = 1) { outboxRepository.delete(outbox1) }
-        verify(inverse = true) { outboxRepository.delete(outbox2) }
-        confirmVerified(outboxRepository, kafkaSender)
+        verify(exactly = 1) { simpleOutboxRepository.delete(outbox.copy(status = PROCESSING)) }
+        verify(exactly = 1) { simpleOutboxRepository.delete(outbox1.copy(status = PROCESSING)) }
+        verify(inverse = true) { simpleOutboxRepository.delete(outbox2.copy(status = PROCESSING)) }
+        verify(inverse = true) { simpleOutboxRepository.delete(outbox2.copy(status = PENDING)) }
+        confirmVerified(simpleOutboxRepository, outboxRepository, kafkaSender)
+
     }
 }

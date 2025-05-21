@@ -1,9 +1,11 @@
 package com.scr.project.sam.domains.outbox.repository
 
 import com.scr.project.sam.domains.outbox.model.entity.Outbox
+import com.scr.project.sam.domains.outbox.model.entity.OutboxStatus
 import org.bson.types.ObjectId
-import org.springframework.data.mongodb.repository.ReactiveMongoRepository
-import org.springframework.stereotype.Repository
+import reactor.core.publisher.Mono
 
-@Repository
-interface OutboxRepository : ReactiveMongoRepository<Outbox, ObjectId>
+fun interface OutboxRepository {
+
+    fun updateStatus(id: ObjectId, status: OutboxStatus): Mono<Outbox>
+}
