@@ -6,19 +6,16 @@ import com.scr.project.sam.domains.outbox.model.entity.OutboxStatus.PENDING
 import com.scr.project.sam.domains.outbox.model.entity.OutboxStatus.PROCESSING
 import com.scr.project.sam.domains.outbox.repository.OutboxRepository
 import com.scr.project.sam.domains.outbox.repository.SimpleOutboxRepository
-import jakarta.annotation.PostConstruct
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.bson.types.ObjectId
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import reactor.core.Disposable
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.kafka.sender.KafkaSender
 import reactor.kafka.sender.SenderRecord
 import reactor.kotlin.core.publisher.toMono
-import java.time.Duration
 
 @Service
 class OutboxRelayerService(
@@ -29,22 +26,6 @@ class OutboxRelayerService(
 ) {
 
     private val logger: Logger = LoggerFactory.getLogger(OutboxRelayerService::class.java)
-    private var pollingDisposable: Disposable? = null
-
-    fun pollAndProcess(pollInterval: Duration = Duration.ofSeconds(1)): Flux<Outbox> {
-        return Flux.interval(pollInterval)
-            .flatMap { processOutbox() }
-    }
-
-    @PostConstruct
-    fun startPolling() {
-        pollingDisposable?.dispose()
-        pollingDisposable = pollAndProcess().subscribe()
-    }
-
-    fun stopPolling() {
-        pollingDisposable?.dispose()
-    }
 
     fun processOutbox(): Flux<Outbox> {
         return simpleOutboxRepository.findAllByStatus(PENDING)
