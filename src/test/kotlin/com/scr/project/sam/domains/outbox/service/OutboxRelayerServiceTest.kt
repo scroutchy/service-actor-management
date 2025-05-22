@@ -148,6 +148,80 @@ class OutboxRelayerServiceTest {
         verify(inverse = true) { simpleOutboxRepository.delete(outbox2.copy(status = PROCESSING)) }
         verify(inverse = true) { simpleOutboxRepository.delete(outbox2.copy(status = PENDING)) }
         confirmVerified(simpleOutboxRepository, outboxRepository, kafkaSender)
+    }
 
+    @Test
+    fun `processOutbox should handle deserialization error in createSenderRecord`() {
+        val invalidOutbox = outbox.copy(payload = "{ invalid json }", aggregateType = "com.scr.project.sam.UnknownType")
+        every { simpleOutboxRepository.findAllByStatus(PENDING) } answers { listOf(invalidOutbox).toFlux() }
+        every { outboxRepository.updateStatus(invalidOutbox.id, PROCESSING) } answers { invalidOutbox.copy(status = PROCESSING).toMono() }
+        outboxRelayerService.processOutbox()
+            .test()
+            .expectSubscription()
+            .expectNextCount(1)
+            .verifyComplete()
+        verify { simpleOutboxRepository.findAllByStatus(PENDING) }
+        verify { outboxRepository.updateStatus(invalidOutbox.id, PROCESSING) }
+        verify(inverse = true) { kafkaSender.send(any<Mono<SenderRecord<String, Any, ObjectId>>>()) }
+        verify(inverse = true) { simpleOutboxRepository.delete(any()) }
+    }
+
+    @Test
+    fun `processOutbox should handle error when updating status to PROCESSING`() {
+        every { simpleOutboxRepository.findAllByStatus(PENDING) } answers { listOf(outbox).toFlux() }
+        every { outboxRepository.updateStatus(outbox.id, PROCESSING) } answers { Mono.error(RuntimeException("Update status failed")) }
+        outboxRelayerService.processOutbox()
+            .test()
+            .expectSubscription()
+            .expectNextCount(1)
+            .verifyComplete()
+        verify { simpleOutboxRepository.findAllByStatus(PENDING) }
+        verify { outboxRepository.updateStatus(outbox.id, PROCESSING) }
+        verify(inverse = true) { kafkaSender.send(any<Mono<SenderRecord<String, Any, ObjectId>>>()) }
+        verify(inverse = true) { simpleOutboxRepository.delete(any()) }
+    }
+
+    @Test
+    fun `processOutbox should handle empty kafka result`() {
+        every { simpleOutboxRepository.findAllByStatus(PENDING) } answers { listOf(outbox).toFlux() }
+        every { kafkaSender.send(any<Mono<SenderRecord<String, Any, ObjectId>>>()) } answers { Flux.empty() }
+        every { simpleOutboxRepository.delete(outbox.copy(status = PROCESSING)) } answers { Mono.empty() }
+        outboxRelayerService.processOutbox()
+            .test()
+            .expectSubscription()
+            .expectNextCount(1)
+            .verifyComplete()
+        verify(exactly = 1) { kafkaSender.send(any<Mono<SenderRecord<String, Any, ObjectId>>>()) }
+        verify(inverse = true) { simpleOutboxRepository.delete(outbox.copy(status = PROCESSING)) }
+    }
+
+    @Test
+    fun `processOutbox should handle error in findAllByStatus`() {
+        every { simpleOutboxRepository.findAllByStatus(PENDING) } answers { Flux.error(RuntimeException("DB error")) }
+        outboxRelayerService.processOutbox()
+            .test()
+            .expectSubscription()
+            .expectError(RuntimeException::class.java)
+            .verify()
+        verify { simpleOutboxRepository.findAllByStatus(PENDING) }
+    }
+
+    @Test
+    fun `processOutbox should handle deserialization error due to missing constructor`() {
+        val outboxWithUnknownType = outbox.copy(aggregateType = "java.util.Locale")
+        every { simpleOutboxRepository.findAllByStatus(PENDING) } answers { listOf(outboxWithUnknownType).toFlux() }
+        every { outboxRepository.updateStatus(outboxWithUnknownType.id, PROCESSING) } answers {
+            outboxWithUnknownType.copy(status = PROCESSING).toMono()
+        }
+        outboxRelayerService.processOutbox()
+            .test()
+            .expectSubscription()
+            .expectNextCount(1)
+            .verifyComplete()
+        verify { simpleOutboxRepository.findAllByStatus(PENDING) }
+        verify { outboxRepository.updateStatus(outboxWithUnknownType.id, PROCESSING) }
+        verify(inverse = true) { kafkaSender.send(any<Mono<SenderRecord<String, Any, ObjectId>>>()) }
+        verify(inverse = true) { simpleOutboxRepository.delete(any()) }
     }
 }
+
