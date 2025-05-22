@@ -41,20 +41,21 @@ class OutboxRelayerService(
     }
 
     private fun processSingleOutboxEvent(outbox: Outbox): Mono<Outbox> {
-        return createSenderRecord(outbox)
-            .flatMap { kafkaSender.send(it.toMono()).singleOrEmpty() }
-            .doOnSuccess {
-                logger.info(
-                    "Outbox event {} successfully sent to Kafka (Offset: {}, Partition: {}).",
-                    outbox.id, it?.recordMetadata()?.offset(), it?.recordMetadata()?.partition()
-                )
-            }
-            .doOnError { e -> logger.warn("Failed to send outbox event {} to Kafka: {}", outbox.id, e.message, e) }
-            .flatMap { simpleOutboxRepository.delete(outbox) }
-            .doOnSubscribe { logger.debug("Deleting outbox event {} after successful sending.", outbox.id) }
-            .doOnSuccess { logger.debug("Outbox event {} successfully deleted.", outbox.id) }
-            .doOnError { logger.warn("Failed to delete outbox event {}: {}", outbox.id, it.message) }
-            .thenReturn(outbox)
+        return outbox.toMono().delayUntil {
+            createSenderRecord(it)
+                .flatMap { kafkaSender.send(it.toMono()).singleOrEmpty() }
+                .doOnSuccess {
+                    logger.info(
+                        "Outbox event {} successfully sent to Kafka (Offset: {}, Partition: {}).",
+                        outbox.id, it?.recordMetadata()?.offset(), it?.recordMetadata()?.partition()
+                    )
+                }
+                .doOnError { e -> logger.warn("Failed to send outbox event {} to Kafka: {}", outbox.id, e.message, e) }
+                .flatMap { simpleOutboxRepository.delete(outbox) }
+                .doOnSubscribe { logger.debug("Deleting outbox event {} after successful sending.", outbox.id) }
+                .doOnSuccess { logger.debug("Outbox event {} successfully deleted.", outbox.id) }
+                .doOnError { logger.warn("Failed to delete outbox event {}: {}", outbox.id, it.message) }
+        }
     }
 
     private fun createSenderRecord(outbox: Outbox): Mono<SenderRecord<String, Any, ObjectId>> {
