@@ -11,3 +11,5 @@ spring:
     sasl:
       mechanism:
       password: dummyPassword
+outbox:
+  initialDelay: 10000
