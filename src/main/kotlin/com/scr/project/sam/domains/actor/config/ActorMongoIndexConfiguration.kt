@@ -15,7 +15,7 @@ class ActorMongoIndexConfiguration(mongoTemplate: ReactiveMongoTemplate) {
 
     private fun actorIndexes(mongoTemplate: ReactiveMongoTemplate) {
         mongoTemplate.indexOps(Actor::class.java)
-            .ensureIndex(
+            .createIndex(
                 Index().on(Actor::surname.name, ASC)
                     .on(Actor::name.name, ASC)
                     .unique()
