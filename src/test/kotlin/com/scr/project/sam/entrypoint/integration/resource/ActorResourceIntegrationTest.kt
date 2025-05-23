@@ -6,6 +6,7 @@ import com.epages.restdocs.apispec.WebTestClientRestDocumentationWrapper
 import com.scr.project.sam.AbstractIntegrationTest
 import com.scr.project.sam.RewardedKafkaTestConsumer
 import com.scr.project.sam.TestKafkaConfig
+import com.scr.project.sam.awaitUntil
 import com.scr.project.sam.domains.actor.dao.ActorDao
 import com.scr.project.sam.domains.actor.dao.bradPitt
 import com.scr.project.sam.domains.actor.error.ActorExceptionHandler.ErrorResponse
@@ -143,12 +144,13 @@ internal class ActorResourceIntegrationTest(
                     assertThat(birthDate).isEqualTo(body.birthDate)
                     assertThat(deathDate).isEqualTo(body.deathDate)
                 }
-                Thread.sleep(1000)
-                val messages = kafkaRewardedConsumer.poll()
-                assertThat(messages).hasSize(1)
-                with(messages.first()) {
-                    assertThat(id).isEqualTo(body.id)
-                    assertThat(type).isEqualTo(ACTOR)
+                awaitUntil {
+                    val messages = kafkaRewardedConsumer.poll()
+                    assertThat(messages).hasSize(1)
+                    with(messages.first()) {
+                        assertThat(id).isEqualTo(body.id)
+                        assertThat(type).isEqualTo(ACTOR)
+                    }
                 }
             }
     }
