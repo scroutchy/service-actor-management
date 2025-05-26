@@ -8,15 +8,13 @@ import org.springframework.data.mongodb.ReactiveMongoDatabaseFactory
 import org.springframework.data.mongodb.ReactiveMongoTransactionManager
 import org.springframework.data.mongodb.core.convert.MongoCustomConversions
 import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRepositories
-import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.transaction.ReactiveTransactionManager
 import org.springframework.transaction.annotation.EnableTransactionManagement
 import org.springframework.transaction.reactive.TransactionalOperator
 
 @Configuration(proxyBeanMethods = false)
-@EnableReactiveMongoRepositories(basePackages = ["com.scr.project.sam.domains"])
+@EnableReactiveMongoRepositories(basePackages = ["com.scr.project"])
 @EnableTransactionManagement
-@EnableScheduling
 class MongoCoreConfiguration {
 
     @Bean

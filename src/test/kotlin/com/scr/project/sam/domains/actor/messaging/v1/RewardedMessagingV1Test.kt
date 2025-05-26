@@ -1,9 +1,9 @@
 package com.scr.project.sam.domains.actor.messaging.v1
 
+import com.scr.project.commons.cinema.outbox.model.entity.Outbox
+import com.scr.project.commons.cinema.outbox.service.OutboxService
 import com.scr.project.sam.config.TopicProperties
 import com.scr.project.sam.domains.actor.model.entity.Actor
-import com.scr.project.sam.domains.outbox.model.entity.Outbox
-import com.scr.project.sam.domains.outbox.service.OutboxService
 import io.mockk.clearMocks
 import io.mockk.confirmVerified
 import io.mockk.every

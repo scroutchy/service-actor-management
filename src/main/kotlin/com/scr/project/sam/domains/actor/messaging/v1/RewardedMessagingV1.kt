@@ -1,11 +1,11 @@
 package com.scr.project.sam.domains.actor.messaging.v1
 
+import com.scr.project.commons.cinema.outbox.model.entity.Outbox
+import com.scr.project.commons.cinema.outbox.service.OutboxService
 import com.scr.project.sam.config.TopicProperties
 import com.scr.project.sam.domains.actor.mapper.toHexString
 import com.scr.project.sam.domains.actor.mapper.toRewardedKafka
 import com.scr.project.sam.domains.actor.model.entity.Actor
-import com.scr.project.sam.domains.outbox.model.entity.Outbox
-import com.scr.project.sam.domains.outbox.service.OutboxService
 import com.scr.project.srm.RewardedKafkaDto
 import org.slf4j.LoggerFactory
 import org.springframework.boot.context.properties.EnableConfigurationProperties
