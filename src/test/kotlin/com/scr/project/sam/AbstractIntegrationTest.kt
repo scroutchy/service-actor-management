@@ -52,7 +52,7 @@ abstract class AbstractIntegrationTest {
         @JvmStatic
         @DynamicPropertySource
         fun properties(registry: DynamicPropertyRegistry) {
-            registry.add("spring.data.mongodb.uri", mongoDBContainer::getReplicaSetUrl)
+            registry.add("spring.data.mongodb.uri") { mongoDBContainer.replicaSetUrl }
             registry.add("spring.security.oauth2.resourceserver.jwt.issuer-uri") { "${keycloakContainer.authServerUrl}/realms/my-realm" }
             registry.add("spring.kafka.bootstrap-servers") { kafkaContainer.bootstrapServers }
             registry.add("spring.kafka.schema.registry.url") {
