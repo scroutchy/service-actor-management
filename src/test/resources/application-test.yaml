@@ -5,6 +5,7 @@ spring:
     mongodb:
       uri: mongodb://mongodb:27017/test
   kafka:
+    enabled: true
     bootstrap-servers: kafka:9092
     schema.registry.url: http://schema-registry:8081
     security-protocol: PLAINTEXT
