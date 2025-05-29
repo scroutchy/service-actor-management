@@ -38,17 +38,15 @@ import org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPri
 import org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath
 import org.springframework.restdocs.request.RequestDocumentation.parameterWithName
 import org.springframework.restdocs.webtestclient.WebTestClientRestDocumentation.documentationConfiguration
-import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.test.web.reactive.server.WebTestClient.ListBodySpec
 import java.time.LocalDate
 import java.util.Locale
 import kotlin.random.Random
 
-@SpringBootTest(webEnvironment = RANDOM_PORT, properties = ["spring.kafka.enabled=true"])
+@SpringBootTest(webEnvironment = RANDOM_PORT)
 @AutoConfigureWebTestClient
 @AutoConfigureRestDocs
-@ActiveProfiles("kafka")
 @Import(TestKafkaConfig::class)
 internal class ActorResourceIntegrationTest(
     @Autowired private val webTestClient: WebTestClient,

@@ -23,7 +23,7 @@ import org.springframework.test.web.reactive.server.WebTestClient
 import java.time.LocalDate
 import java.util.Locale
 
-@SpringBootTest(webEnvironment = RANDOM_PORT)
+@SpringBootTest(webEnvironment = RANDOM_PORT, properties = ["spring.kafka.enabled=false"])
 @AutoConfigureWebTestClient
 @AutoConfigureRestDocs
 @Import(TestKafkaConfig::class)
