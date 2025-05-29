@@ -1,18 +1,21 @@
 package com.scr.project.sam.domains.outbox.service
 
+import com.scr.project.sam.config.Properties.KAFKA_ENABLING_PROPERTY
 import com.scr.project.sam.domains.outbox.model.entity.Outbox
 import com.scr.project.sam.domains.outbox.repository.SimpleOutboxRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
 
 @Service
-class OutboxService(val simpleOutboxRepository: SimpleOutboxRepository) {
+@ConditionalOnProperty(name = [KAFKA_ENABLING_PROPERTY], havingValue = "true", matchIfMissing = false)
+class OutboxService(val simpleOutboxRepository: SimpleOutboxRepository) : IOutboxService {
 
     private val logger: Logger = LoggerFactory.getLogger(OutboxService::class.java)
 
-    fun send(outbox: Outbox): Mono<Outbox> {
+    override fun send(outbox: Outbox): Mono<Outbox> {
         return simpleOutboxRepository.insert(outbox)
             .doOnSubscribe { logger.debug("Persisting outbox record: ${outbox.payload}") }
             .doOnSuccess { logger.info("Persisted outbox record: ${outbox.payload}") }

@@ -5,7 +5,7 @@ import com.scr.project.sam.domains.actor.mapper.toHexString
 import com.scr.project.sam.domains.actor.mapper.toRewardedKafka
 import com.scr.project.sam.domains.actor.model.entity.Actor
 import com.scr.project.sam.domains.outbox.model.entity.Outbox
-import com.scr.project.sam.domains.outbox.service.OutboxService
+import com.scr.project.sam.domains.outbox.service.IOutboxService
 import com.scr.project.srm.RewardedKafkaDto
 import org.slf4j.LoggerFactory
 import org.springframework.boot.context.properties.EnableConfigurationProperties
@@ -14,7 +14,7 @@ import reactor.core.publisher.Mono
 
 @Service
 @EnableConfigurationProperties(TopicProperties::class)
-class RewardedMessagingV1(private val producer: OutboxService, private val topicProperties: TopicProperties) {
+class RewardedMessagingV1(private val producer: IOutboxService, private val topicProperties: TopicProperties) {
 
     private val logger = LoggerFactory.getLogger(RewardedMessagingV1::class.java)
 

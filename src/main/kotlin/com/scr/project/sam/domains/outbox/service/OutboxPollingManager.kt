@@ -1,15 +1,18 @@
 package com.scr.project.sam.domains.outbox.service
 
+import com.scr.project.sam.config.Properties.KAFKA_ENABLING_PROPERTY
 import com.scr.project.sam.domains.outbox.model.entity.Outbox
 import jakarta.annotation.PostConstruct
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
 import reactor.core.Disposable
 import reactor.core.publisher.Flux
 import java.time.Duration
 
 @Component
+@ConditionalOnProperty(name = [KAFKA_ENABLING_PROPERTY], havingValue = "true", matchIfMissing = false)
 class OutboxPollingManager(
     private val outboxRelayerService: OutboxRelayerService
 ) {

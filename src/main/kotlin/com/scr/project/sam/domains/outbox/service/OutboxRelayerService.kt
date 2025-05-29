@@ -1,6 +1,7 @@
 package com.scr.project.sam.domains.outbox.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.scr.project.sam.config.Properties.KAFKA_ENABLING_PROPERTY
 import com.scr.project.sam.domains.outbox.model.entity.Outbox
 import com.scr.project.sam.domains.outbox.model.entity.OutboxStatus.PENDING
 import com.scr.project.sam.domains.outbox.model.entity.OutboxStatus.PROCESSING
@@ -10,6 +11,7 @@ import org.apache.kafka.clients.producer.ProducerRecord
 import org.bson.types.ObjectId
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -18,6 +20,7 @@ import reactor.kafka.sender.SenderRecord
 import reactor.kotlin.core.publisher.toMono
 
 @Service
+@ConditionalOnProperty(name = [KAFKA_ENABLING_PROPERTY], havingValue = "true", matchIfMissing = false)
 class OutboxRelayerService(
     private val simpleOutboxRepository: SimpleOutboxRepository,
     private val outboxRepository: OutboxRepository,
