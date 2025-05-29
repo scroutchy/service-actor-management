@@ -38,6 +38,11 @@ spec:
                 secretKeyRef:
                   name: sasl-password-secret
                   key: saslPassword
+            - name: SPRING_KAFKA_ENABLED
+              valueFrom:
+                configMapKeyRef:
+                  name: service-actor-management-configmap
+                  key: SPRING_KAFKA_ENABLED
           resources:
             requests:
               ephemeral-storage: {{ .Values.resources.requests.ephemeralStorage }}
