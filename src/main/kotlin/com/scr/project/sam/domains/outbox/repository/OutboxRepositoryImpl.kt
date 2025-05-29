@@ -3,6 +3,7 @@ package com.scr.project.sam.domains.outbox.repository
 import com.scr.project.sam.domains.outbox.model.entity.Outbox
 import com.scr.project.sam.domains.outbox.model.entity.OutboxStatus
 import org.bson.types.ObjectId
+import org.springframework.context.annotation.Profile
 import org.springframework.data.mongodb.core.FindAndModifyOptions.options
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.query.Update
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Repository
 import reactor.core.publisher.Mono
 
 @Repository
+@Profile("kafka")
 class OutboxRepositoryImpl(private val mongoTemplate: ReactiveMongoTemplate) : OutboxRepository {
 
     override fun updateStatus(id: ObjectId, status: OutboxStatus): Mono<Outbox> {

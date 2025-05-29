@@ -4,12 +4,14 @@ import com.scr.project.sam.domains.outbox.model.entity.Outbox
 import jakarta.annotation.PostConstruct
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 import reactor.core.Disposable
 import reactor.core.publisher.Flux
 import java.time.Duration
 
 @Component
+@Profile("kafka")
 class OutboxPollingManager(
     private val outboxRelayerService: OutboxRelayerService
 ) {

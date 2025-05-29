@@ -10,6 +10,7 @@ import org.apache.kafka.clients.producer.ProducerRecord
 import org.bson.types.ObjectId
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -18,6 +19,7 @@ import reactor.kafka.sender.SenderRecord
 import reactor.kotlin.core.publisher.toMono
 
 @Service
+@Profile("kafka")
 class OutboxRelayerService(
     private val simpleOutboxRepository: SimpleOutboxRepository,
     private val outboxRepository: OutboxRepository,

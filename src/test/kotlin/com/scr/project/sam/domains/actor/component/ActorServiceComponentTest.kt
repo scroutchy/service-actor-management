@@ -15,11 +15,13 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.test.context.ActiveProfiles
 import reactor.kotlin.test.test
 import java.time.LocalDate
 import java.util.Locale
 
-@SpringBootTest
+@SpringBootTest(properties = ["spring.kafka.enabled=true"])
+@ActiveProfiles("kafka")
 class ActorServiceComponentTest(
     @Autowired private val simpleActorRepository: SimpleActorRepository,
     @Autowired private val actorRepository: ActorRepositoryImpl,
