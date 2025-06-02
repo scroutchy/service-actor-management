@@ -2,6 +2,7 @@ package com.scr.project.sam
 
 import dasniko.testcontainers.keycloak.KeycloakContainer
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.DynamicPropertyRegistry
@@ -13,7 +14,7 @@ import org.testcontainers.containers.wait.strategy.Wait
 import org.testcontainers.kafka.ConfluentKafkaContainer
 import org.testcontainers.utility.DockerImageName
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@TestInstance(PER_CLASS)
 @ActiveProfiles("test")
 abstract class AbstractIntegrationTest {
 
@@ -52,7 +53,7 @@ abstract class AbstractIntegrationTest {
         @JvmStatic
         @DynamicPropertySource
         fun properties(registry: DynamicPropertyRegistry) {
-            registry.add("spring.data.mongodb.uri", mongoDBContainer::getReplicaSetUrl)
+            registry.add("spring.data.mongodb.uri") { mongoDBContainer.replicaSetUrl }
             registry.add("spring.security.oauth2.resourceserver.jwt.issuer-uri") { "${keycloakContainer.authServerUrl}/realms/my-realm" }
             registry.add("spring.kafka.bootstrap-servers") { kafkaContainer.bootstrapServers }
             registry.add("spring.kafka.schema.registry.url") {
