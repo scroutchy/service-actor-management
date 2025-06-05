@@ -13,3 +13,11 @@ spring:
       mechanism: PLAIN
       username: user1
       password: ${KAFKA_SASL_PASSWORD}
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
