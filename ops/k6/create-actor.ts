@@ -34,3 +34,15 @@ export default function () {
     }
 
 }
+
+/*export const options = {
+  stages: [
+    { duration: '10s', target: 1 },
+    { duration: '20s', target: 1 },
+    { duration: '10s', target: 0 },
+  ],
+  thresholds: {
+    http_req_failed: ['rate<0.01'], // Moins de 1% d'échecs de requêtes HTTP
+    http_req_duration: ['p(95)<200'], // 95% des requêtes doivent être en dessous de 200ms
+  },
+};*/
