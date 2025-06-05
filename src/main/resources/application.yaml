@@ -13,3 +13,12 @@ spring:
       mechanism: PLAIN
       username: user1
       password: ${KAFKA_SASL_PASSWORD}
+management:
+  endpoints:
+    web:
+      base-path: /service-actor-management/actuator
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when-authorized

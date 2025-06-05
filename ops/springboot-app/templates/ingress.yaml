@@ -14,4 +14,11 @@ spec:
           service:
             name: {{ include "springboot-app.fullname" . }}
             port:
-              number: 8080
+              number: {{ .Values.service.port }}
+      - path: /service-actor-management/actuator/health
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ include "springboot-app.fullname" . }}
+            port:
+              number: {{ .Values.service.port }}

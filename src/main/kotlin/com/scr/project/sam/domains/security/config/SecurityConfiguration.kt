@@ -1,5 +1,6 @@
 package com.scr.project.sam.domains.security.config
 
+import com.scr.project.sam.entrypoint.resource.ApiConstants.ACTUATOR_PATH
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -27,7 +28,8 @@ class SecurityConfiguration(@Value("\${spring.security.oauth2.resourceserver.jwt
         return http
             .csrf { it.disable() }
             .authorizeExchange {
-                it.pathMatchers(POST).hasRole(ROLE_WRITE)
+                it.pathMatchers("$ACTUATOR_PATH/health").permitAll()
+                    .pathMatchers(POST).hasRole(ROLE_WRITE)
                     .pathMatchers(PATCH).hasRole(ROLE_WRITE)
                     .pathMatchers(OPTIONS).permitAll()
                     .anyExchange().authenticated()
