@@ -18,6 +18,7 @@ private val kMongoVersion: String by project
 private val mockkVersion: String by project
 private val commonsCinemaVersion: String by project
 private val testcontainersKeycloackVersion: String by project
+private val rewardedManagementVersion: String by project
 
 java {
 	toolchain {
@@ -54,7 +55,7 @@ dependencies {
     implementation("com.scr.project.commons.cinema:commons-cinema-outbox:${commonsCinemaVersion}")
     implementation("com.scr.project.commons.cinema:commons-cinema-kafka:${commonsCinemaVersion}")
     implementation("io.confluent:kafka-avro-serializer:7.9.0")
-    add("avroSchemas", "org.scr.project:service-rewarded-management:0.1.1:schemas")
+    add("avroSchemas", "com.scr.project:service-rewarded-management:$rewardedManagementVersion:schemas")
     testImplementation("com.scr.project.commons.cinema.test:commons-cinema-test:$commonsCinemaVersion")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
