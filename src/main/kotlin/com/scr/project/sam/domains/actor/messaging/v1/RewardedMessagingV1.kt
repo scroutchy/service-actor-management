@@ -3,7 +3,6 @@ package com.scr.project.sam.domains.actor.messaging.v1
 import com.scr.project.commons.cinema.outbox.model.entity.Outbox
 import com.scr.project.commons.cinema.outbox.service.IOutboxService
 import com.scr.project.sam.config.TopicProperties
-import com.scr.project.sam.domains.actor.mapper.toHexString
 import com.scr.project.sam.domains.actor.mapper.toRewardedKafka
 import com.scr.project.sam.domains.actor.model.entity.Actor
 import com.scr.project.srm.RewardedKafkaDto
@@ -22,7 +21,7 @@ class RewardedMessagingV1(private val producer: IOutboxService, private val topi
         return producer.send(
             Outbox(
                 RewardedKafkaDto::class.java.name,
-                actor.id.toHexString(),
+                "uniqueKey",
                 actor.toRewardedKafka().toString(),
                 topicProperties.actorCreationNotification,
             )
