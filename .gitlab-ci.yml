@@ -103,8 +103,11 @@ publish:
     paths:
       - build/libs/*.jar
 
-.deploy_base:
-  services: []
+
+
+# — VOS ANCIENS JOBS DE DÉPLOIEMENT RESTENT INCHANGÉS —
+# On les adapte légèrement pour ne pas utiliser l'agent
+.deploy_local_base:
   stage: deploy
   when: manual
   image: alpine:latest
@@ -121,7 +124,7 @@ publish:
 deploy_kind:
   tags:
     - k8s_docker
-  extends: .deploy_base
+  extends: .deploy_local_base # Utilise la nouvelle base locale
   variables:
     KUBECONFIG_CLUSTER: "$KUBECONFIG_CONTENT_K8SinDD"
     CLUSTER_VALUES_FILE: "./ops/springboot-app/values-kind.yaml"
@@ -129,10 +132,50 @@ deploy_kind:
 deploy_minikube:
   tags:
     - minikube
-  extends: .deploy_base
+  extends: .deploy_local_base # Utilise la nouvelle base locale
   variables:
     KUBECONFIG_CLUSTER: "$KUBECONFIG_CONTENT"
     CLUSTER_VALUES_FILE: "./ops/springboot-app/values-minikube.yaml"
+
+
+# Base pour tous les déploiements
+
+.deploy_base:
+  stage: deploy
+  when: manual
+  # L'image doit contenir kubectl et helm
+  image:
+    name: alpine/k8s:1.28.2
+    entrypoint: [""] # On surcharge l'entrypoint
+  before_script:
+    - apk update && apk add bash
+    - |
+      # Le KUBECONFIG n'est plus injecté par une variable.
+      # L'Agent GitLab configure l'accès.
+      # On doit simplement spécifier le contexte de l'agent à utiliser.
+      # La syntaxe est <chemin_du_projet>:<nom_de_l_agent>
+      kubectl config use-context cinema7590904/service-actor-management:eks-scr-agent
+    - helm version
+  script:
+    # La commande de déploiement helm reste la même,
+    # mais elle est maintenant exécutée dans le contexte du cluster EKS.
+    # On utilise la variable $CLUSTER_VALUES_FILE pour spécifier quel fichier de valeurs utiliser.
+    - helm upgrade --install springboot-app ./ops/springboot-app --namespace default --set image.tag=${CI_COMMIT_REF_SLUG} -f ./ops/springboot-app/values.yaml -f "$CLUSTER_VALUES_FILE" --debug
+
+# NOUVEAU JOB POUR EKS
+
+deploy_eks:
+  extends: .deploy_base
+  variables:
+    # On pointe vers le nouveau fichier de valeurs pour EKS
+    CLUSTER_VALUES_FILE: "./ops/springboot-app/values-eks-scr-cluster.yaml"
+  environment:
+    name: production
+    url: http://app.eks.example.com # Mettez l'URL de votre application ici
+#  rules:
+#    # Déploiement manuel sur la branche main
+#    - if: '$CI_COMMIT_BRANCH == "main"'
+#      when: manual
 
 
 include:
