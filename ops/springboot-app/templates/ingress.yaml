@@ -8,8 +8,7 @@ metadata:
 spec:
   ingressClassName: alb
   rules:
-  - host: {{ .Values.ingress.host }}
-    http:
+  - http:
       paths:
       - path: /api/actors
         pathType: Prefix
