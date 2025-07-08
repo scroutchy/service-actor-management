@@ -4,6 +4,7 @@ metadata:
   name: {{ include "springboot-app.fullname" . }}
   annotations:
     alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/scheme: internet-facing
 spec:
   ingressClassName: alb
   rules:
