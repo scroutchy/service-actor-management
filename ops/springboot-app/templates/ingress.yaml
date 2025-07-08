@@ -3,7 +3,7 @@ kind: Ingress
 metadata:
   name: {{ include "springboot-app.fullname" . }}
 spec:
-  ingressClassName: nginx
+  ingressClassName: alb
   rules:
   - host: {{ .Values.ingress.host }}
     http:
