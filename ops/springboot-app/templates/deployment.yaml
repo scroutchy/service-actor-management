@@ -55,11 +55,15 @@ spec:
             httpGet:
               path: /service-actor-management/actuator/health
               port: {{ .Values.service.port }}
-            initialDelaySeconds: 30
+            initialDelaySeconds: 60
             periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
           readinessProbe:
             httpGet:
               path: /service-actor-management/actuator/health
               port: {{ .Values.service.port }}
-            initialDelaySeconds: 5
+            initialDelaySeconds: 30
             periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
